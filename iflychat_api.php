@@ -28,11 +28,11 @@ function iflychat_render_chat($set = array()) {
   $json = (array)iflychat_get_key($refset);
   $json = array_merge($refset, $json);
   $r .= 'Drupal={};Drupal.settings={};Drupal.settings.drupalchat={};' . iflychat_arrayToJSObject(array('drupalchat' => iflychat_init($json)), 'Drupal.settings')  . '</script>';
-  $r .= '<link type="text/css" rel="stylesheet" href="' . $_iflychat['A_HOST'] .  '/i/' . $json['css'] . '/cache.css" media="all" />';
-  $r .= '<script type="text/javascript" src="' . $_iflychat['A_HOST'] .  '/j/cache.js"></script>';
+  $r .= '<link type="text/css" rel="stylesheet" href="' . (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/i/' . $json['css'] . '/cache.css" media="all" />';
+  $r .= '<script type="text/javascript" src="' . (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/j/cache.js"></script>';
   $r .= '<script type="text/javascript" src="' . $iflychat['path'] .  'js/ba-emotify.js"></script>';
   $r .= '<script type="text/javascript" src="' . $iflychat['path'] .  'js/jquery.titlealert.min.js"></script>';
-  $r .= '<script src="'. $_iflychat['A_HOST'] .  '/h/' . $json['css'] . '/cache.js" type=\'text/javascript\'></script>';
+  $r .= '<script src="'. (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/h/' . $json['css'] . '/cache.js" type=\'text/javascript\'></script>';
   return $r;
 }
 
@@ -57,24 +57,39 @@ function iflychat_init($jsset) {
       'addUrl' => " ",
 	  'notificationSound' => "1",
 	  'basePath' => "/",
-	  /*
-	  'stopWordList' => get_option('iflychat_stop_word_list'),
-	  'useStopWordList' => get_option('iflychat_use_stop_word_list'),
-	  'blockHL' => get_option('iflychat_stop_links'),
-	  'allowAnonHL' => get_option('iflychat_allow_anon_links'),
-	  'iup' => (get_option('iflychat_user_picture') == 'yes')?'1':'2',*/
+	  'useStopWordList' => $iflychat['use_stop_word_list'],
+	  'blockHL' => $iflychat['stop_links'],
+	  'allowAnonHL' => ($iflychat['allow_anon_links'])?'1':'2',
+	  'iup' => ($iflychat['user_picture'])?'1':'2',
 	  'admin' => $jsset['is_admin']?'1':'0',
 	  'session_key' => $jsset['key'],
     );
 	
-	
-	
-        $my_settings['external_host'] = $_iflychat['HOST'];
-        $my_settings['external_port'] = $_iflychat['PORT'];
-        $my_settings['external_a_host'] = $_iflychat['A_HOST'];
-        $my_settings['external_a_port'] = $_iflychat['A_PORT'];		
-	  
-	    
+	if($iflychat['use_stop_word_list'] != '1') {
+	  $my_settings['stopWordList'] = $iflychat['stop_word_list'];
+	}
+	if($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") {
+      $my_settings['external_host'] = $_iflychat['A_HOST'];
+      $my_settings['external_port'] = $_iflychat['A_PORT'];
+      $my_settings['external_a_host'] = $_iflychat['A_HOST'];
+      $my_settings['external_a_port'] = $_iflychat['A_PORT'];		
+	}
+    else {
+      $my_settings['external_host'] = $_iflychat['HOST'];
+      $my_settings['external_port'] = $_iflychat['PORT'];
+      $my_settings['external_a_host'] = $_iflychat['HOST'];
+      $my_settings['external_a_port'] = $_iflychat['PORT'];
+	}	
+	if($iflychat['user_picture']) {
+		if(isset($jsset['avatar_url'])) {
+	      $my_settings['up'] = $jsset['avatar_url'];
+        }
+        else {
+         $my_settings['up'] = $iflychat['path'] . '/themes/light/images/default_avatar.png';
+        }
+		$my_settings['default_up'] = $iflychat['path'] . '/themes/light/images/default_avatar.png';
+		$my_settings['default_cr'] = $iflychat['path'] . '/themes/light/images/default_room.png';
+    }    
 	return $my_settings;
 }
 
@@ -441,14 +456,12 @@ function iflychat_get_key($sets) {
 	'validState' => array('available','offline','busy','idle'),
   );
   
-  if($avatar) {
-    if(isset($user->picture) && ($user->picture != 0)) {
-	  $file = file_load($user->picture);
-	  $data['up'] = file_create_url($file->uri);
+  if($iflychat['user_picture']) {
+    if(isset($sets['avatar'])) {
+	  $data['up'] = $sets['avatar'];
     }
     else {
-	  global $base_url;
-      $data['up'] = $base_url . '/' . drupal_get_path('module', 'drupalchat') . '/themes/light/images/default_avatar.png';
+      $data['up'] = $iflychat('path') . '/themes/light/images/default_avatar.png';
     }
   }
   
