@@ -1,10 +1,12 @@
 <?php
 
 global $_iflychat, $iflychat;
-
+/* Configure various settings of iFlyChat PHP Client here */
 $iflychat = array(
+/* Get a valid API key from following instructions given here - https://iflychat.com/installation-php-client */
   'api_key' => 'XXXXXXX',
-  'path' => '/php/',
+/* The relative path from home URL to where this file is present */  
+  'path' => '/iflychat-php/',
   'base' => (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'],
   'theme' => 'light',
   'user_picture' => TRUE,
