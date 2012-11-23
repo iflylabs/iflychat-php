@@ -85,10 +85,10 @@ function iflychat_init($jsset) {
 	      $my_settings['up'] = $jsset['avatar_url'];
         }
         else {
-         $my_settings['up'] = $iflychat['path'] . '/themes/light/images/default_avatar.png';
+         $my_settings['up'] = $iflychat['path'] . 'themes/light/images/default_avatar.png';
         }
-		$my_settings['default_up'] = $iflychat['path'] . '/themes/light/images/default_avatar.png';
-		$my_settings['default_cr'] = $iflychat['path'] . '/themes/light/images/default_room.png';
+		$my_settings['default_up'] = $iflychat['path'] . 'themes/light/images/default_avatar.png';
+		$my_settings['default_cr'] = $iflychat['path'] . 'themes/light/images/default_room.png';
     }    
 	return $my_settings;
 }
@@ -461,7 +461,7 @@ function iflychat_get_key($sets) {
 	  $data['up'] = $sets['avatar'];
     }
     else {
-      $data['up'] = $iflychat('path') . '/themes/light/images/default_avatar.png';
+      $data['up'] = $iflychat('path') . 'themes/light/images/default_avatar.png';
     }
   }
   
