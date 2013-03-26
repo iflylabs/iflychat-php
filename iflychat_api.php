@@ -1,6 +1,6 @@
 <?php
 
-require_once('./iflychat_api_settings.php'); 
+require_once(dirname(__FILE__).'/iflychat_api_settings.php'); 
 
  
 function iflychat_render_chat($set = array()) {
