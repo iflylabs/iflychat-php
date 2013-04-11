@@ -9,6 +9,8 @@ function iflychat_render_chat($set = array()) {
 	  'id' => 0,
 	  'avatar_url' => FALSE,
 	  'is_admin' => FALSE,
+    'relationships_set' => FALSE,
+    'upl' => FALSE,
   );
   $refset = array_merge($defset, $set);
   
@@ -90,6 +92,12 @@ function iflychat_init($jsset) {
 		$my_settings['default_up'] = $iflychat['path'] . 'themes/light/images/default_avatar.png';
 		$my_settings['default_cr'] = $iflychat['path'] . 'themes/light/images/default_room.png';
     }    
+  if(isset($jsset['upl']) && $jsset['upl']) {
+    $my_settings['upl'] = $jsset['upl'];
+  }
+  else {
+    $my_settings['upl'] = 'user/' . $jsset['uid'];
+  }  
 	return $my_settings;
 }
 
@@ -462,6 +470,20 @@ function iflychat_get_key($sets) {
     }
     else {
       $data['up'] = $iflychat('path') . 'themes/light/images/default_avatar.png';
+    }
+  }
+
+  if(isset($sets['upl']) && $sets['upl']) {
+    $data['upl'] = $sets['upl'];
+  }
+  else {
+    $data['upl'] = 'user/' . $id;
+  }
+
+  if($iflychat['enable_relationships']) {
+    if(isset($sets['relationships_set'])) {
+      $data['rel'] = '1';
+      $data['valid_uids'] = $sets['relationships_set'];
     }
   }
   
