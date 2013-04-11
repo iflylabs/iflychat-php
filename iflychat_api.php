@@ -6,9 +6,9 @@ require_once(dirname(__FILE__).'/iflychat_api_settings.php');
 function iflychat_render_chat($set = array()) {
   $defset = array(
     'name' => NULL,
-	'id' => 0,
-	'avatar' => FALSE,
-	'is_admin' => FALSE,
+	  'id' => 0,
+	  'avatar_url' => FALSE,
+	  'is_admin' => FALSE,
   );
   $refset = array_merge($defset, $set);
   
@@ -39,31 +39,31 @@ function iflychat_render_chat($set = array()) {
 function iflychat_init($jsset) {
   global $_iflychat, $iflychat;
   $my_settings = array(
-      'uid' => $jsset['uid'],
-	  'username' => $jsset['name'],
-      'current_timestamp' => time(),
-      'polling_method' => "3",
-      'pollUrl' => " ",
-      'sendUrl' => " ",
-      'statusUrl' => " ",
-      'status' => "1",
-      'goOnline' => 'Go Online',
-      'goIdle' => 'Go Idle',
-      'newMessage' => 'New chat message!',
-      'images' => $iflychat['path'] . 'themes/light/images/',
-      'sound' => $iflychat['path'] . 'swf/sound.swf',
-      'noUsers' => "<div class=\"item-list\"><ul><li class=\"drupalchatnousers even first last\">No users online</li></ul></div>",
-      'smileyURL' => $iflychat['path'] . 'smileys/very_emotional_emoticons-png/png-32x32/',
-      'addUrl' => " ",
-	  'notificationSound' => "1",
-	  'basePath' => "/",
-	  'useStopWordList' => $iflychat['use_stop_word_list'],
-	  'blockHL' => $iflychat['stop_links'],
-	  'allowAnonHL' => ($iflychat['allow_anon_links'])?'1':'2',
-	  'iup' => ($iflychat['user_picture'])?'1':'2',
-	  'admin' => $jsset['is_admin']?'1':'0',
-	  'session_key' => $jsset['key'],
-    );
+    'uid' => $jsset['uid'],
+    'username' => $jsset['name'],
+    'current_timestamp' => time(),
+    'polling_method' => "3",
+    'pollUrl' => " ",
+    'sendUrl' => " ",
+    'statusUrl' => " ",
+    'status' => "1",
+    'goOnline' => 'Go Online',
+    'goIdle' => 'Go Idle',
+    'newMessage' => 'New chat message!',
+    'images' => $iflychat['path'] . 'themes/light/images/',
+    'sound' => $iflychat['path'] . 'swf/sound.swf',
+    'noUsers' => "<div class=\"item-list\"><ul><li class=\"drupalchatnousers even first last\">No users online</li></ul></div>",
+    'smileyURL' => $iflychat['path'] . 'smileys/very_emotional_emoticons-png/png-32x32/',
+    'addUrl' => " ",
+    'notificationSound' => "1",
+    'basePath' => "/",
+    'useStopWordList' => $iflychat['use_stop_word_list'],
+    'blockHL' => $iflychat['stop_links'],
+    'allowAnonHL' => ($iflychat['allow_anon_links'])?'1':'2',
+    'iup' => ($iflychat['user_picture'])?'1':'2',
+    'admin' => $jsset['is_admin']?'1':'0',
+    'session_key' => $jsset['key'],
+  );
 	
 	if($iflychat['use_stop_word_list'] != '1') {
 	  $my_settings['stopWordList'] = $iflychat['stop_word_list'];
@@ -448,17 +448,17 @@ function iflychat_get_key($sets) {
     'uname' => $name,
     'uid' => $id,
     'api_key' => $iflychat['api_key'],
-	'image_path' => $iflychat['base'] . $iflychat['path'] . 'themes/light/images',
-	'isLog' => TRUE,
-	'whichTheme' => 'blue',
-	'enableStatus' => TRUE,
-	'role' => ($sets['is_admin'])?"admin":"normal",
-	'validState' => array('available','offline','busy','idle'),
+	  'image_path' => $iflychat['base'] . $iflychat['path'] . 'themes/light/images',
+	  'isLog' => TRUE,
+	  'whichTheme' => 'blue',
+	  'enableStatus' => TRUE,
+	  'role' => ($sets['is_admin'])?"admin":"normal",
+	  'validState' => array('available','offline','busy','idle'),
   );
   
   if($iflychat['user_picture']) {
-    if(isset($sets['avatar'])) {
-	  $data['up'] = $sets['avatar'];
+    if(isset($sets['avatar_url'])) {
+	    $data['up'] = $sets['avatar_url'];
     }
     else {
       $data['up'] = $iflychat('path') . 'themes/light/images/default_avatar.png';
