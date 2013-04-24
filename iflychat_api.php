@@ -574,3 +574,38 @@ function iflychat_update_settings() {
 	  //form_set_error('drupalchat_external_api_key', "Unable to connect to iFlyChat server. Error code - " . $result->code . ". Error message - " . $result->error . ".");
 	}
 }
+
+function iflychat_get_message_thread($id1 = "1", $id2 = "2") {
+  global $_iflychat, $iflychat;
+  $data = json_encode(array(
+    'uid1' => $id1,
+    'uid2' => $id2,
+    'api_key' => $iflychat['api_key'],
+    ));
+  $options = array(
+    'method' => 'POST',
+    'data' => $data,
+    'timeout' => 15,
+    'headers' => array('Content-Type' => 'application/json'),
+    );
+  $result = iflychat_extended_http_request($_iflychat['A_HOST'] . ':' . $_iflychat['A_PORT'] .  '/q/', $options);
+  $q = json_decode($result->data);
+  return $q;
+}
+
+function iflychat_get_message_inbox($id1 = "1") {
+  global $_iflychat, $iflychat;
+  $data = json_encode(array(
+    'uid' => $id1,
+    'api_key' => $iflychat['api_key'],
+    ));
+  $options = array(
+    'method' => 'POST',
+    'data' => $data,
+    'timeout' => 15,
+    'headers' => array('Content-Type' => 'application/json'),
+    );
+  $result = iflychat_extended_http_request($_iflychat['A_HOST'] . ':' . $_iflychat['A_PORT'] .  '/r/', $options);
+  $q = json_decode($result->data);
+  return $q;
+}
