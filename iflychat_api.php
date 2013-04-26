@@ -29,6 +29,7 @@ function iflychat_render_chat($set = array()) {
   }
   $json = (array)iflychat_get_key($refset);
   $json = array_merge($refset, $json);
+
   $r .= 'Drupal={};Drupal.settings={};Drupal.settings.drupalchat={};' . iflychat_arrayToJSObject(array('drupalchat' => iflychat_init($json)), 'Drupal.settings')  . '</script>';
   $r .= '<link type="text/css" rel="stylesheet" href="' . (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/i/' . $json['css'] . '/cache.css" media="all" />';
   $r .= '<script type="text/javascript" src="' . (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/j/cache.js"></script>';
@@ -514,7 +515,7 @@ function iflychat_arrayToJSObject($array, $varname, $sub = false ) {
             // Multi Dimensional Array 
             $temp[] = iflychat_arrayToJSObject($value, $jskey, true); 
         } else { 
-            if (is_numeric($value)) { 
+            if (is_numeric($value) && $key=="current_timestamp") { 
                 $jskey .= "$value"; 
             } elseif (is_bool($value)) { 
                 $jskey .= ($value ? 'true' : 'false') . ""; 
