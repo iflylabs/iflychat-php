@@ -27,16 +27,49 @@ function iflychat_render_chat($set = array()) {
 	  $r .= 'alert("'."Unable to connect to iFlyChat server. Error code - " . $ures->code . ". Error message - " . $ures->error .'.");';
 	}
   }
-  $json = (array)iflychat_get_key($refset);
+  if(!$iflychat['load_async']) {
+    $json = (array)iflychat_get_key($refset);
+  }
+  else {
+    $json['key'] = '';
+  }
+  
   $json = array_merge($refset, $json);
 
   $r .= 'Drupal={};Drupal.settings={};Drupal.settings.drupalchat={};' . iflychat_arrayToJSObject(array('drupalchat' => iflychat_init($json)), 'Drupal.settings')  . '</script>';
-  $r .= '<link type="text/css" rel="stylesheet" href="' . (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/i/' . $json['css'] . '/cache.css" media="all" />';
-  $r .= '<script type="text/javascript" src="' . (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/j/cache.js"></script>';
-  $r .= '<script type="text/javascript" src="' . $iflychat['path'] .  'js/ba-emotify.js"></script>';
-  $r .= '<script type="text/javascript" src="' . $iflychat['path'] .  'js/jquery.titlealert.min.js"></script>';
-  $r .= '<script src="'. (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/h/' . $json['css'] . '/cache.js" type=\'text/javascript\'></script>';
+  if(!$iflychat['load_async']) {
+    $r .= '<link type="text/css" rel="stylesheet" href="' . (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/i/' . $json['css'] . '/cache.css" media="all" />';
+    $r .= '<script type="text/javascript" src="' . (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/j/cache.js"></script>';
+    $r .= '<script type="text/javascript" src="' . $iflychat['path'] .  'js/ba-emotify.js"></script>';
+    $r .= '<script type="text/javascript" src="' . $iflychat['path'] .  'js/jquery.titlealert.min.js"></script>';
+    $r .= '<script src="'. (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? $_iflychat['A_HOST'] : $_iflychat['HOST']) .  '/h/' . $json['css'] . '/cache.js" type=\'text/javascript\'></script>';
+  }
+  else {
+    $r .= '<script type="text/javascript" src="' . $iflychat['path'] .  'js/ba-emotify.js"></script>';
+    $r .= '<script type="text/javascript" src="' . $iflychat['path'] .  'js/jquery.titlealert.min.js"></script>';
+    $r .= '<script type="text/javascript" src="' . $iflychat['path'] .  'js/iflychat.js"></script>';
+  }
   return $r;
+}
+
+function iflychat_render_chat_ajax($set = array()) {
+  $defset = array(
+    'name' => NULL,
+    'id' => 0,
+    'avatar_url' => FALSE,
+    'is_admin' => FALSE,
+    'relationships_set' => FALSE,
+    'upl' => FALSE,
+  );
+  $refset = array_merge($defset, $set);
+  
+  $json['is_admin'] = $refset['is_admin'];
+
+  $json = (array)iflychat_get_key($refset);
+
+  $json = array_merge($refset, $json);
+
+  return json_encode($json);
 }
 
 function iflychat_init($jsset) {
@@ -71,6 +104,11 @@ function iflychat_init($jsset) {
 	if($iflychat['use_stop_word_list'] != '1') {
 	  $my_settings['stopWordList'] = $iflychat['stop_word_list'];
 	}
+
+  if($iflychat['load_async']) {
+    $my_settings['exurl'] = $iflychat['path'] .  'ajax.php';
+  }
+
 	if($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") {
       $my_settings['external_host'] = $_iflychat['A_HOST'];
       $my_settings['external_port'] = $_iflychat['A_PORT'];

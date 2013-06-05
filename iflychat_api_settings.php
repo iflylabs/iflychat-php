@@ -43,6 +43,7 @@ $iflychat = array(
   'allow_anon_links' => TRUE,
   'show_admin_list' => FALSE,
   'enable_relationships' => TRUE,
+  'load_async' => FALSE,
 );
 
 $_iflychat = array (
