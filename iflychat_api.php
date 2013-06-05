@@ -108,6 +108,14 @@ function iflychat_init($jsset) {
   if($iflychat['load_async']) {
     $my_settings['exurl'] = $iflychat['path'] .  'ajax.php';
   }
+  
+  if($iflychat['minimize_chat_user_list']) {
+    $my_settings['open_chatlist_default'] = "2";
+  }
+  else {
+    $my_settings['open_chatlist_default'] = "1";
+  }
+  
 
 	if($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") {
       $my_settings['external_host'] = $_iflychat['A_HOST'];
