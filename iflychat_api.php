@@ -88,6 +88,7 @@ function iflychat_init($jsset) {
     'newMessage' => 'New chat message!',
     'images' => $iflychat['path'] . 'themes/light/images/',
     'sound' => $iflychat['path'] . 'swf/sound.swf',
+    'soundFile' => $iflychat['path'] . 'wav/notification.mp3',
     'noUsers' => "<div class=\"item-list\"><ul><li class=\"drupalchatnousers even first last\">No users online</li></ul></div>",
     'smileyURL' => $iflychat['path'] . 'smileys/very_emotional_emoticons-png/png-32x32/',
     'addUrl' => " ",
@@ -507,7 +508,7 @@ function iflychat_get_key($sets) {
 	  'isLog' => TRUE,
 	  'whichTheme' => 'blue',
 	  'enableStatus' => TRUE,
-	  'role' => ($sets['is_admin'])?"admin":"normal",
+	  'role' => ($sets['is_admin'])?"admin":(isset($sets['custom_roles'])?$sets['custom_roles']:"normal"),
 	  'validState' => array('available','offline','busy','idle'),
   );
   
