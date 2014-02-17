@@ -1,14 +1,14 @@
 <?php
 
-global $_iflychat, $iflychat;
+global $_iflychat, $iflychat_settings;
 /* Configure various settings of iFlyChat PHP Client here */
-$iflychat = array(
+$iflychat_settings = array(
 /* Get a valid API key from following instructions given here - https://iflychat.com/installation-php-client */
-  'api_key' => 'XXXXXXX',
+  'api_key' => 'XXX',
 /* The relative path from home or base URL to where this file is present */  
   'path' => '/iflychat-php/',
 /* The base url, do not change */
-  'base' => (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'],
+  //'base' => (($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'],
 /* The theme of the chat. Valid values are 'light' and 'dark'. */  
   'theme' => 'light',
 /* Display user avatars or pictures. Valid values are TRUE and FALSE. */
@@ -32,8 +32,8 @@ $iflychat = array(
   'anon_name_set' => 'usa',
 /* Enable public chatroom. Valid values are TRUE and FALSE. */
   'public_chatroom' => TRUE,
-  'chat_top_bar_color' => '#222222',
-  'chat_top_bar_text_color' => '#FFFFFF',
+  'chat_topbar_color' => '#222222',
+  'chat_topbar_text_color' => '#FFFFFF',
   'chat_font_color' => '#222222',
   'public_chatroom_header' => 'Public Chatroom',
   'chat_list_header' => 'Chat',
@@ -43,14 +43,10 @@ $iflychat = array(
   'allow_anon_links' => FALSE,
   'show_admin_list' => FALSE,
   'enable_relationships' => FALSE,
-  'load_async' => FALSE,
+  'load_async' => TRUE,
+  'ajax_file' => 'chat-ajax.php',
   'minimize_chat_user_list' => FALSE,
-);
-
-$_iflychat = array (
-  'HOST' => 'http://api.iflychat.com',
-  'A_HOST' => 'https://api.iflychat.com',
-  'PORT' => 80,
-  'A_PORT' => 443,
+  /* Please specify the prefix to be used with anonymous users. It shouldn't be long. Ideally it should be between 4 to 7 characters. */
+  'guest_prefix' => 'Guest ',
 );
 

@@ -1,28 +1,54 @@
 <?php
+/**
+ * Include iFlyChat PHP SDK files
+ * Ensure that path to iFlyChat PHP SDK files are correct
+ *
+**/
+require_once('./iflychat_api_settings.php');
 require_once('./iflychat_api.php');
-$user_details = array('name' => 'admin', 'id' => '1', 'is_admin' => TRUE, 'avatar_url' => '/path/to/my_picture.jpg', 'upl' => 'link_to_profile_of_current_user.php');
-//$user_details = array();
 
-$ifly_code = iflychat_render_chat($user_details);
-echo '<html><head><script src = "https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>'; 
-print $ifly_code;
-echo '</head><body><h1>TEST.......................................................................................................................</h1><br>';
+/**
+ *
+ * Use iFlyChat class get_html_code() function to render chat HTML code.
+ * This code should be printed on all pages where you want chat to be present.
+ *
+**/
+$iflychat = new iFlyChat($iflychat_settings);
+$ifly_html_code = $iflychat->get_html_code();
 
 ?>
+<html>
+<head>
+<script src = "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+</head>
+<body>
+<h1>How to include iFlyChat code in a sample PHP page?</h1>
+<!-- iFlyChat code begins -->
+<?php print $ifly_html_code; ?>
+<!-- iFlyChat code ends -->
+<br>
 
+
+<!-- iFlyChat Embed Code (will work only available in premium plans)  begins -->
 <style>
 .drupalchat-embed-chatroom-content {height: 550px !important;}
 </style>
- 
 <script type="text/javascript">
-Drupal.settings.drupalchat.embed = "1";
-Drupal.settings.drupalchat.ur_hy = "1";
-Drupal.settings.drupalchat.embed_msg = 'Type your message here. Press Enter to send.';
-Drupal.settings.drupalchat.embed_online_user_text = 'Online Users';
-</script>
- 
+if(typeof iflyembed == "undefined") {
+  iflyembed = {};
+  iflyembed.settings = {};
+  iflyembed.settings.ifly = {};
+}
+iflyembed.settings.ifly.embed = "1";
+iflyembed.settings.ifly.ur_hy = "1";
+iflyembed.settings.ifly.embed_msg = 'Type your message here. Press Enter to send.';
+iflyembed.settings.ifly.embed_online_user_text = 'Online Users';
+</script> 
 <div id="drupalchat-embed-chatroom-0" class="drupalchat-embed-chatroom-container"></div>
+<!-- iFlyChat Embed Code (will work only available in premium plans)  ends -->
 
-<?php
-echo '<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><h1>TEST</h1></body></html>';
-?>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<h1>TEST</h1>
+</body>
+</html>
+
