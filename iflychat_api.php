@@ -1,6 +1,6 @@
 <?php
 
-class iFlyChat {
+class iFlyChat {tyq1OrjSHU14b6b4f6w3eOpRoHjj4wvBx_Pkpha9grkW8287
 
   private $timers, $defset, $user_details, $settings;
   
