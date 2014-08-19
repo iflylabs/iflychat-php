@@ -67,8 +67,6 @@ class iFlyChat {
       $r .= '<script src="'. (($this->check_ssl()) ? $this->settings['A_HOST'] : $this->settings['HOST']) .  '/h/' . $json['css'] . '/cache.js" type=\'text/javascript\'></script>';
     }
     else {
-      $r .= '<script type="text/javascript" src="' . $this->settings['path'] .  'js/ba-emotify.js"></script>';
-      $r .= '<script type="text/javascript" src="' . $this->settings['path'] .  'js/jquery.titlealert.min.js"></script>';
       $r .= '<script type="text/javascript" src="' . $this->settings['path'] .  'js/iflychat.js"></script>';
     }
     return $r;
@@ -99,7 +97,7 @@ class iFlyChat {
       'goOnline' => 'Go Online',
       'goIdle' => 'Go Idle',
       'newMessage' => 'New chat message!',
-      'images' => $this->settings['path'] . 'themes/light/images/',
+      'images' => $this->settings['path'] . 'themes/' . $this->settings['theme'] . '/images/',
       'sound' => $this->settings['path'] . 'swf/sound.swf',
       'noUsers' => "<div class=\"item-list\"><ul><li class=\"drupalchatnousers even first last\">No users online</li></ul></div>",
       'smileyURL' => $this->settings['path'] . 'smileys/very_emotional_emoticons-png/png-32x32/',
@@ -110,6 +108,7 @@ class iFlyChat {
       'blockHL' => $this->settings['stop_links'],
       'allowAnonHL' => ($this->settings['allow_anon_links'])?'1':'2',
       'iup' => ($this->settings['user_picture'])?'1':'2',
+      'theme' => $this->settings['theme'],
       //'admin' => $jsset['is_admin']?'1':'0',
       //'session_key' => $jsset['key'],
     );
@@ -135,6 +134,10 @@ class iFlyChat {
     else {
       $my_settings['open_chatlist_default'] = "1";
     }
+
+    $my_settings['guestPrefix'] = ($this->settings['anon_prefix'] . " ");
+    $my_settings['mobileWebUrl'] = $this->settings['path'] .  $this->settings['mobile_file'];
+    $my_settings['chat_type'] = $this->settings['chat_type'];
   
 
 	  if($this->check_ssl()) {
@@ -154,11 +157,13 @@ class iFlyChat {
 	      $my_settings['up'] = $jsset['avatar_url'];
         }
         else {
-         $my_settings['up'] = $this->settings['path'] . 'themes/light/images/default_avatar.png';
+         $my_settings['up'] = $this->settings['path'] . 'themes/' . $this->settings['theme'] . '/images/default_avatar.png';
         }
-		  $my_settings['default_up'] = $this->settings['path'] . 'themes/light/images/default_avatar.png';
-		  $my_settings['default_cr'] = $this->settings['path'] . 'themes/light/images/default_room.png';
-    }    
+    }
+    
+    $my_settings['default_up'] = $this->settings['path'] . 'themes/' . $this->settings['theme'] . '/images/default_avatar.png';
+    $my_settings['default_cr'] = $this->settings['path'] . 'themes/' . $this->settings['theme'] . '/images/default_room.png';
+    
     if(!$this->settings['load_async']) {
       if(isset($jsset['upl']) && $jsset['upl']) {
         $my_settings['upl'] = $jsset['upl'];
@@ -506,13 +511,23 @@ class iFlyChat {
       'uname' => $name,
       'uid' => $id,
       'api_key' => $this->settings['api_key'],
-      'image_path' => $this->settings['base'] . $this->settings['path'] . 'themes/light/images',
+      'image_path' => $this->settings['base'] . $this->settings['path'] . 'themes/' . $this->settings['theme'] . '/images',
       'isLog' => TRUE,
       'whichTheme' => 'blue',
       'enableStatus' => TRUE,
       'role' => ($this->user_details['is_admin'])?"admin":"normal",
       'validState' => array('available','offline','busy','idle'),
     );
+
+    if($this->user_details['is_admin']) {
+      $data['role'] = "admin";
+    }
+    else {
+      $data['role'] = array();
+      foreach ($this->user_details['role'] as $rkey => $rvalue) {
+        $data['role'][$rkey] = $rvalue;
+      }
+    }
     
     if($this->settings['user_picture']) {
       $data['up'] = $this->get_user_picture_url();    
@@ -520,7 +535,7 @@ class iFlyChat {
 
     $data['upl'] = $this->get_user_profile_link();
 
-    if($this->settings['enable_relationships']) {
+    if($this->settings['enable_user_relationships']) {
       if(isset($this->user_details['relationships_set'])) {
         $data['rel'] = '1';
         $data['valid_uids'] = $this->user_details['relationships_set'];
@@ -528,6 +543,14 @@ class iFlyChat {
     }
     else {
       $data['rel'] = '0';
+    }
+
+    if($this->settings['enable_user_group_filtering']) {
+      $data['rel'] = '0';
+      $data['valid_groups'] = array();
+      foreach ($this->user_details['role'] as $rkey => $rvalue) {
+        $data['valid_groups'][$rkey] = $rvalue;
+      }
     }
     
     $data = json_encode($data);
@@ -551,7 +574,7 @@ class iFlyChat {
   
   private function get_user_picture_url() {
     if(!($this->user_details['avatar_url']))  {
-      $this->user_details['avatar_url'] = $this->settings['path'] . 'themes/light/images/default_avatar.png';
+      $this->user_details['avatar_url'] = $this->settings['path'] . 'themes/' . $this->settings['theme'] . '/images/default_avatar.png';
     }
     return $this->user_details['avatar_url'];
   }
@@ -614,7 +637,7 @@ class iFlyChat {
     $path = dirname(__FILE__) . "/guest_names/drupalchat_guest_random_names.txt";
     $f_contents = file($path); 
     $line = trim($f_contents[rand(0, count($f_contents) - 1)]);
-    return $this->settings['guest_prefix'] . $line;
+    return $this->settings['anon_prefix'] . $line;
   }
 
   private function iflychat_hash_base64($data) {
@@ -636,10 +659,18 @@ class iFlyChat {
       'font_color' => $this->settings['chat_font_color'],
       'chat_list_header' => $this->settings['chat_list_header'],
       'public_chatroom_header' => $this->settings['public_chatroom_header'],
-      'rel' => ($this->settings['enable_relationships'])?'1':'0',
+      'rel' => ($this->settings['enable_user_relationships'])?'1':'0',
       'version' => $this->settings['version'],
-      'show_admin_list' => ($this->settings['show_admin_list'])?'1':'2',
-      'guest_prefix' => $this->settings['guest_prefix'],
+      'show_admin_list' => ($this->settings['chat_type'] == '1')?'1':'2',
+      'clear' => $this->settings['allow_single_message_delete'],
+      'delmessage' => $this->settings['allow_clear_room_history'],
+      'ufc' => ($this->settings['allow_user_font_color'])?'1':'2',    
+      'guest_prefix' => $this->settings['anon_prefix'],
+      'use_stop_word_list' => $this->settings['use_stop_word_list'],
+      'stop_word_list' => $this->settings['stop_word_list'],
+      'file_attachment' => ($this->settings['enable_file_attachment'])?'1':'2',
+      'mobile_browser_app' => ($this->settings['enable_mobile_browser_app'])?'1':'2',
+      'enable_groups' => ($this->settings['enable_user_group_filtering'])?'1':'2',
     );
     
     $data = json_encode($data);
@@ -695,5 +726,24 @@ class iFlyChat {
     $result = $this->iflychat_extended_http_request($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] .  '/r/', $options);
     $q = json_decode($result->data);
     return $q;
+  }
+
+  public function render_chat_mobile() {
+
+    $data = array('settings' => array());
+    $data['settings']['authUrl'] = $this->settings['path'] .  $this->settings['ajax_file'];
+    $data['settings']['host'] = (($this->check_ssl())?($this->settings['A_HOST']):($this->settings['HOST']));
+    $data['settings']['port'] = (($this->check_ssl())?($this->settings['A_PORT']):($this->settings['PORT']));
+    $data = json_encode($data);
+    
+    $options = array(
+      'method' => 'POST',
+      'data' => $data,
+      'timeout' => 15,
+      'headers' => array('Content-Type' => 'application/json'),
+      );
+    $result = $this->iflychat_extended_http_request($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] .  '/m/v1/app/', $options);
+    
+    return $result->data;
   }
 }

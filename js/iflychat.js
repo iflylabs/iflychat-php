@@ -7,7 +7,7 @@ b.urls[0]){l("css");break}h+=1;b&&(h<200?setTimeout(t,50):l("css"))}}var c,s,m={
     $.post(Drupal.settings.drupalchat.exurl, function(data) {
       if(data) {
 	      if(data && (typeof data.css != "undefined") && (typeof data.key != "undefined")) {
-		      LazyLoad.css(Drupal.settings.drupalchat.external_a_host + ':' + Drupal.settings.drupalchat.external_a_port + '/i/' + data.css + '/cache.css', function () {
+		      LazyLoad.css(['//cdn.iflychat.com/css/iflychat-'+Drupal.settings.drupalchat.theme+'.css', Drupal.settings.drupalchat.external_a_host + ':' + Drupal.settings.drupalchat.external_a_port + '/i/' + data.css + '/settings/no.cache.css'], function () {
 		        Drupal.settings.drupalchat.session_key = data.key;
 		        if(typeof data.name != "undefined") {
 		          Drupal.settings.drupalchat.username = data.name;
@@ -26,12 +26,12 @@ b.urls[0]){l("css");break}h+=1;b&&(h<200?setTimeout(t,50):l("css"))}}var c,s,m={
 		        }
 		        //LazyLoad.js(['https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js'], function() {
 		        //jQuery.noConflict();
-		        LazyLoad.js([Drupal.settings.drupalchat.external_a_host + ':' + Drupal.settings.drupalchat.external_a_port + '/j/cache.js', Drupal.settings.drupalchat.external_a_host + ':' + Drupal.settings.drupalchat.external_a_port + '/h/'+ data.css + '/cache.js'], function () {
-            });
+		        LazyLoad.js([Drupal.settings.drupalchat.external_a_host + ':' + Drupal.settings.drupalchat.external_a_port + '/h/'+ data.css + '/settings/no.cache.js', '//cdn.iflychat.com/js/iflychat.min.js'], function () {
+            	});
             //});
           });
-		    }
+		}
       }
-	  });
+	});
   });
 })(jQuery);
