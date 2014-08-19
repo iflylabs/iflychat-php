@@ -13,6 +13,7 @@ class iFlyChat {
 	    'is_admin' => FALSE,
       'relationships_set' => FALSE,
       'upl' => FALSE,
+      'role' => array(),
     );
     
     $this->settings = array(
