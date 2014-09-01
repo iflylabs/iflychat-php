@@ -13,12 +13,13 @@ class iFlyChat {
 	    'is_admin' => FALSE,
       'relationships_set' => FALSE,
       'upl' => FALSE,
-      'role' => array(),
+      'room_roles' => array(),
+      'user_groups' => array(),
     );
     
     $this->settings = array(
       'base' => '',
-      'version' => 'PHP-1.1.0',
+      'version' => 'PHP-1.1.1',
       'HOST' => 'http://api.iflychat.com',
       'A_HOST' => 'https://api.iflychat.com',
       'PORT' => 80,
@@ -525,7 +526,7 @@ class iFlyChat {
     }
     else {
       $data['role'] = array();
-      foreach ($this->user_details['role'] as $rkey => $rvalue) {
+      foreach ($this->user_details['room_roles'] as $rkey => $rvalue) {
         $data['role'][$rkey] = $rvalue;
       }
     }
@@ -549,7 +550,7 @@ class iFlyChat {
     if($this->settings['enable_user_group_filtering']) {
       $data['rel'] = '0';
       $data['valid_groups'] = array();
-      foreach ($this->user_details['role'] as $rkey => $rvalue) {
+      foreach ($this->user_details['user_groups'] as $rkey => $rvalue) {
         $data['valid_groups'][$rkey] = $rvalue;
       }
     }
@@ -562,7 +563,7 @@ class iFlyChat {
       'headers' => array('Content-Type' => 'application/json'),
     );
     $result = NULL;
-    $result = $this->iflychat_extended_http_request($this->settings['A_HOST'] . '/p/', $options);
+    $result = $this->iflychat_extended_http_request($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] . '/p/', $options);
     $result = json_decode($result->data);
     $result->name = $name;
     $result->uid = $id;
@@ -662,7 +663,7 @@ class iFlyChat {
       'public_chatroom_header' => $this->settings['public_chatroom_header'],
       'rel' => ($this->settings['enable_user_relationships'])?'1':'0',
       'version' => $this->settings['version'],
-      'show_admin_list' => ($this->settings['chat_type'] == '1')?'1':'2',
+      'show_admin_list' => ($this->settings['chat_type'] == '2')?'1':'2',
       'clear' => $this->settings['allow_single_message_delete'],
       'delmessage' => $this->settings['allow_clear_room_history'],
       'ufc' => ($this->settings['allow_user_font_color'])?'1':'2',    

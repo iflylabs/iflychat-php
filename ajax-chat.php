@@ -19,7 +19,8 @@ $user_details = array(
   'is_admin' => TRUE, 
   'avatar_url' => '/path/to/my_picture.jpg', 
   'upl' => 'link_to_profile_of_current_user.php',
-  'role' => array(), 
+  'room_roles' => array(), 
+  'user_groups' => array(),
 );
 
 /**

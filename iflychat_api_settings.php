@@ -229,6 +229,7 @@ $iflychat_settings = array(
    * 1 - Community Chat
    * 2 - Support Chat
    */
+  
   'chat_type' => '1',
 
   'enable_user_group_filtering' => FALSE,
