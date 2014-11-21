@@ -4,8 +4,9 @@
  * Ensure that path to iFlyChat PHP SDK files are correct
  *
 **/
-require_once('./iflychat_api_settings.php');
-require_once('./iflychat_api.php');
+require_once('./iflychatsettings.php');
+require_once('./iflychatuserdetails.php');
+require_once('./iflychat.php');
 
 /**
  *
@@ -13,8 +14,10 @@ require_once('./iflychat_api.php');
  * This code should be printed on all pages where you want chat to be present.
  *
 **/
-$iflychat = new iFlyChat($iflychat_settings);
-$ifly_html_code = $iflychat->get_html_code();
+global $iflychat_userinfo;
+$iflychat_settings = new iFlyChatSettings();
+$iflychat = new iFlyChat($iflychat_settings->iflychat_settings, $iflychat_userinfo->getUserDetails());
+$ifly_html_code = $iflychat->getHtmlCode();
 
 ?>
 <html>
@@ -48,7 +51,6 @@ iflyembed.settings.ifly.embed_online_user_text = 'Online Users';
 <!-- iFlyChat Embed Code (will work only available in premium plans)  ends -->
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-<h1>TEST</h1>
 </body>
 </html>
 
