@@ -1,7 +1,5 @@
 <?php
 
-
-
 class iFlyChat {
 
   protected $timers, $defset, $user_details, $settings;
@@ -11,8 +9,14 @@ class iFlyChat {
    */
   function __construct($settings = array(), $user_detail = array()) {
     
-    if(session_id() == '') {
-      session_start();
+    if( version_compare(phpversion(), '5.4.0', '>=') ) {
+      if(session_status() === PHP_SESSION_NONE) {
+        session_start();
+      }
+    } else {
+      if(session_id() === '') {
+        session_start();
+      }
     }
     
     $this->defset = array(
@@ -148,7 +152,7 @@ class iFlyChat {
       'noUsers' => "<div class=\"item-list\"><ul><li class=\"drupalchatnousers even first last\">No users online</li></ul></div>",
       'smileyURL' =>$this->getPath() . 'smileys/very_emotional_emoticons-png/png-32x32/',
       'addUrl' => " ",
-      'notificationSound' => "1",
+      'notificationSound' => $this->settings['notification_sound']?'1':'2',
       'basePath' => "/",
       'useStopWordList' => $this->settings['use_stop_word_list'],
       'blockHL' => $this->settings['stop_links'],
@@ -158,6 +162,10 @@ class iFlyChat {
       'changeurl' => $this->getPath() . 'ajax-change-guest-name.php',
       'renderImageInline' => $this->settings['allow_render_images']?'1':'2',
       'searchBar' => $this->settings['enable_search_bar']?'1':'2',
+      'allowSmileys' => $this->settings['enable_smileys']?'1':'2',
+      'guestPrefix' => $this->settings['anon_prefix'] . " ",
+      'mobileWebUrl' => $this->getPath() .  $this->settings['mobile_file'],
+      'chat_type' => $this->settings['chat_type'],
       //'admin' => $jsset['is_admin']?'1':'0',
       //'session_key' => $jsset['key'],
     );
@@ -184,12 +192,7 @@ class iFlyChat {
       $my_settings['open_chatlist_default'] = "1";
     }
 
-    $my_settings['guestPrefix'] = ($this->settings['anon_prefix'] . " ");
-    $my_settings['mobileWebUrl'] = $this->getPath() .  $this->settings['mobile_file'];
-    $my_settings['chat_type'] = $this->settings['chat_type'];
-  
-
-	  if($this->checkSSL()) {
+    if($this->checkSSL()) {
       $my_settings['external_host'] = $this->settings['A_HOST'];
       $my_settings['external_port'] = $this->settings['A_PORT'];
       $my_settings['external_a_host'] = $this->settings['A_HOST'];
@@ -213,6 +216,29 @@ class iFlyChat {
     $my_settings['default_up'] = $this->getPath() . 'themes/' . $this->settings['theme'] . '/images/default_avatar.png';
     $my_settings['default_cr'] = $this->getPath() . 'themes/' . $this->settings['theme'] . '/images/default_room.png';
     
+    $my_settings['text_currently_offline'] = $this->t('drupalchat_user is currently offline.');
+    $my_settings['text_is_typing'] = $this->t('drupalchat_user is typing...');  
+    $my_settings['text_close'] = $this->t('Close');
+    $my_settings['text_minimize'] = $this->t('Minimize');
+    $my_settings['text_mute'] = $this->t('Click to Mute');
+    $my_settings['text_unmute'] = $this->t('Click to Unmute');
+    $my_settings['text_available'] = $this->t('Available');
+    $my_settings['text_idle'] = $this->t('Idle');
+    $my_settings['text_busy'] = $this->t('Busy');
+    $my_settings['text_offline'] = $this->t('Offline'); 
+    $my_settings['text_search_bar'] = $this->t('Type here to search'); 
+    $my_settings['text_user_list_reconnect'] = $this->t('Connecting...');
+    $my_settings['text_user_list_loading'] = $this->t('Loading...');
+
+    if($jsset['is_admin']) {
+      $my_settings['text_ban']                = $this->t('Ban');
+      $my_settings['text_ban_ip']             = $this->t('Ban IP');
+      $my_settings['text_kick']               = $this->t('Kick');
+      $my_settings['text_ban_window_title']   = $this->t('Banned Users');
+      $my_settings['text_ban_window_default'] = $this->t('No users have been banned currently.');
+      $my_settings['text_ban_window_loading'] = $this->t('Loading banned user list...');
+    }
+
     if(!$this->settings['load_async']) {
       if(isset($jsset['upl']) && $jsset['upl']) {
         $my_settings['upl'] = $jsset['upl'];
