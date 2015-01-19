@@ -44,6 +44,10 @@
 		public function setUserGroups($user_groups = array()) {
 			$this->user_details['user_groups'] = $user_groups;
 		}
+	
+        	public function setUserRoles($user_roles = array()){
+            		$this->user_details['user_roles'] = $user_roles;
+        	}
 	}
 
 	/**
@@ -62,6 +66,7 @@
 	$iflychat_userinfo->setProfileLink('/user.php?id=1');
   $iflychat_userinfo->setRoomRoles(array());
 	$iflychat_userinfo->setRelationshipSet(FALSE);
+	 $iflychat_userinfo->setUserRoles(array('1'=>'admin'));
   
   */
 

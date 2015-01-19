@@ -601,6 +601,7 @@ class iFlyChat {
 
     if($this->user_details['is_admin']) {
       $data['role'] = "admin";
+      $data['aRole'] = $this->user_details['user_roles'];
     }
     else {
       $data['role'] = array();
