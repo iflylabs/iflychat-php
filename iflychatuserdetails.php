@@ -45,8 +45,8 @@
 			$this->user_details['user_groups'] = $user_groups;
 		}
 	
-        	public function setUserRoles($user_roles = array()){
-            		$this->user_details['user_roles'] = $user_roles;
+        	public function setUserRoles($all_roles = array()){
+            		$this->user_details['all_roles'] = $all_roles;
         	}
 	}
 
