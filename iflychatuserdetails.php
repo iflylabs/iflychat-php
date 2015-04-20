@@ -14,6 +14,7 @@
 			$this->user_details['relationships_set'] 	= FALSE;
 			$this->user_details['room_roles'] 		= array();
 			$this->user_details['user_groups'] 		= array();
+			$this->user_details['all_roles']		= array();
 		}
 
 		public function getUserDetails() {
@@ -44,6 +45,10 @@
 		public function setUserGroups($user_groups = array()) {
 			$this->user_details['user_groups'] = $user_groups;
 		}
+	
+        	public function setAllRoles($all_roles = array()){
+            		$this->user_details['all_roles'] = $all_roles;
+        	}
 	}
 
 	/**
@@ -62,6 +67,7 @@
 	$iflychat_userinfo->setProfileLink('/user.php?id=1');
   $iflychat_userinfo->setRoomRoles(array());
 	$iflychat_userinfo->setRelationshipSet(FALSE);
+	 $iflychat_userinfo->setAllRoles(array('1'=>'admin'));
   
   */
 
