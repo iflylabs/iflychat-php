@@ -1,6 +1,14 @@
 <?php
 	
-
+	if( version_compare(phpversion(), '5.4.0', '>=') ) {
+	    if(session_status() === PHP_SESSION_NONE) {
+	        session_start();
+	    }
+	} else {
+	    if(session_id() === '') {
+	        session_start();
+	    }
+	}
 	class iFlyChatUserDetails
 	{
 		private $user_details = array();
@@ -57,8 +65,18 @@
 	
   //Uncomment the code below to pass the details of logged-in user
   
+  /**
+     * Pass no parameters if the user is NOT logged-in/unregistered/guest (anonymous user)
+     *
+     */
+    $iflychat_userinfo = new iFlyChatUserDetails();
+
+
+
+  //Uncomment the code below to pass the details of logged-in user
+
   /*
-  
+
   global $iflychat_userinfo;
 	$iflychat_userinfo = new iFlyChatUserDetails('admin', 1);
 	$iflychat_userinfo->setIsAdmin(TRUE);
@@ -66,14 +84,7 @@
 	$iflychat_userinfo->setProfileLink('/user.php?id=1');
   $iflychat_userinfo->setRoomRoles(array());
 	$iflychat_userinfo->setRelationshipSet(FALSE);
-	$iflychat_userinfo->setUserRoles(array('1'=>'admin'));
+	 $iflychat_userinfo->setAllRoles(array('1'=>'admin'));
   
   */
-
-	/**
-	 * Pass no parameters if the user is NOT logged-in/unregistered/guest (anonymous user)
-	 * 
-	 */
-  
-  $iflychat_userinfo = new iFlyChatUserDetails();
 ?>
