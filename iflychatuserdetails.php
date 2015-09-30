@@ -78,7 +78,7 @@ if( version_compare(phpversion(), '5.4.0', '>=') ) {
   /*
 
   global $iflychat_userinfo;
-	$iflychat_userinfo = new iFlyChatUserDetails('admin', 1);
+	$iflychat_userinfo = new iFlyChatUserDetails('admin', '1');
 	$iflychat_userinfo->setIsAdmin(TRUE);
 	$iflychat_userinfo->setAvatarUrl('https://iflychat.com/sites/all/modules/drupalchat/themes/light/images/default_avatar.png');
 	$iflychat_userinfo->setProfileLink('/user.php?id=1');
