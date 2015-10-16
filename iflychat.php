@@ -149,6 +149,7 @@ class iFlyChat {
       'newMessage' => $this->t('New chat message!'),
       'images' => $this->getPath(). 'themes/' . $this->settings['theme'] . '/images/',
       'sound' =>$this->getPath() . 'swf/sound.swf',
+       'soundFile' => $this->getPath() . 'wav/notification.mp3',
       'noUsers' => "<div class=\"item-list\"><ul><li class=\"drupalchatnousers even first last\">No users online</li></ul></div>",
       'smileyURL' =>$this->getPath() . 'smileys/very_emotional_emoticons-png/png-32x32/',
       'addUrl' => " ",
