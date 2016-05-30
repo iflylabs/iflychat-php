@@ -29,6 +29,10 @@ $this->iflychat_settings = array(
 
     'api_key' => 'XXXXXXX',
 
+/**
+     * app_id - Get a valid App Id from following instructions given here - https://iflychat.com/installation-php-client
+     */
+    'app_id' => 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
 
     /**
      * base - The base url of your website

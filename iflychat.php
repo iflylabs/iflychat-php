@@ -1,4 +1,7 @@
 <?php
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 class iFlyChat {
 
@@ -59,873 +62,230 @@ class iFlyChat {
    */
   protected function getPath() {
 
-    return $this->settings['path'];
-  }
-  
-  /*
-   * Getter for iFlyChat html code
-   */
-  public function getHtmlCode($set = array()) {
-    
-  //  $this->user_details = array_merge($this->defset, $set);
-  
-    $json['is_admin'] = $this->user_details['is_admin'];
-    //$my_settings['session_key'] = $json['key'];
-    //global $_iflychat, $iflychat;
-    $r = '<script type="text/javascript">';
+        return $this->settings['path'];
+    }
+
     /*
-    if($_GET['iflychat_update']=='true' && $_GET['iflychat_save']=='yes') {
-      $ures = iflychat_update_settings();
-	    if($ures->code == 200) {
-	      $r .= 'alert(\'iFlyChat Settings updated successfully.\');';
-	    }
-	    else {
-	      $r .= 'alert("'."Unable to connect to iFlyChat server. Error code - " . $ures->code . ". Error message - " . $ures->error .'.");';
-	    }
+     * Getter for iFlyChat html code
+     */
+    public function getHtmlCode($set = array())
+    {
+        $json['is_admin'] = $this->user_details['is_admin'];
+        $json = (array)$this->getKey();
+        $r = '<script>';
+        if ($this->getUserId() && $this->getUserName()) {
+            $r .= 'var iflychat_auth_url = "' . $this->getBaseUrl() . $this->settings['ajax_file'] . '";';
+        }
+        $r .= '</script>';
+        if (isset($_SESSION['token']) && !empty($_SESSION['token'])) {
+            $r .= '<script> var iflychat_auth_token = "' . $_SESSION['token'] . '";</script>';
+        }
+        $r .= '<div id="app"></div>';
+        $r .= '<script type="text/javascript" src="//web.iflychatdev.com:9000/js/bundle.js?cid='
+            . $this->settings['app_id'] . '"</script>';
+//    }
+        return $r;
     }
-    */
-    if(!$this->settings['load_async']) {
-      $json = (array)$this->getKey();
-    }
-    else {
-      $json['key'] = '';
-    }
-  
-    $json = array_merge($this->user_details, $json);
 
-    $r .= 'Drupal={};Drupal.settings={};Drupal.settings.drupalchat=' . json_encode($this->init($json))  . ';</script>';
-    
-    if(!$this->settings['load_async']) {
-      $r .= '<link type="text/css" rel="stylesheet" href="' . (($this->checkSSL()) ? $this->settings['A_HOST'] : $this->settings['HOST']) .  '/i/' . $json['css'] . '/cache.css" media="all" />';
-      $r .= '<script type="text/javascript" src="' . (($this->checkSSL()) ? $this->settings['A_HOST'] : $this->settings['HOST']) .  '/j/cache.js"></script>';
-      $r .= '<script type="text/javascript" src="' . $this->getPath() .  'js/ba-emotify.js"></script>';
-      $r .= '<script type="text/javascript" src="' . $this->getPath() .  'js/jquery.titlealert.min.js"></script>';
-      $r .= '<script src="'. (($this->checkSSL()) ? $this->settings['A_HOST'] : $this->settings['HOST']) .  '/h/' . $json['css'] . '/cache.js" type=\'text/javascript\'></script>';
-    }
-    else {
-      $r .= '<script type="text/javascript" src="' . $this->getPath() .  'js/iflychat.js"></script>';
-    }
-    return $r;
-  }
-  
-  /*
-   * Renders iFlyChat by returning array of user info and key 
-   */
-  public function renderChatAjax($set = array()) {
-    
-  //  $this->user_details = array_merge($this->defset, $set);
-    if($this->settings['api_key'] == '' || empty($this->settings['api_key'])) {
-      return;
-    }
-    else {
-      $json = (array)$this->getKey();
+    /*
+     * Renders iFlyChat by returning array of user info and key
+     */
+    public function renderChatAjax($set = array())
+    {
 
-      $json = array_merge($this->user_details, $json);
+        //  $this->user_details = array_merge($this->defset, $set);
+        if ($this->settings['api_key'] == '' || empty($this->settings['api_key'])) {
+            return;
+        } else {
+            $json = (array)$this->getKey();
+
+//      $json = array_merge($this->user_details, $json);
 
       return json_encode($json);
     }
   }
 
-  protected function t($key) {
-      return $key;
-  }
-
-  /*
-   * Initialises iFlyChat variable
-   */
-  public function init($jsset) {
-    //global $_iflychat, $iflychat;
-    $my_settings = array(
-      //'uid' => $jsset['uid'],
-      //'username' => $jsset['name'],
-      'current_timestamp' => time(),
-      'polling_method' => "3",
-      'pollUrl' => " ",
-      'sendUrl' => " ",
-      'statusUrl' => " ",
-      'status' => "1",
-      'goOnline' => $this->t('Go Online'),
-      'goIdle' => $this->t('Go Idle'),
-      'newMessage' => $this->t('New chat message!'),
-      'images' => $this->getPath(). 'themes/' . $this->settings['theme'] . '/images/',
-      'sound' =>$this->getPath() . 'swf/sound.swf',
-       'soundFile' => $this->getPath() . 'wav/notification.mp3',
-      'noUsers' => "<div class=\"item-list\"><ul><li class=\"drupalchatnousers even first last\">No users online</li></ul></div>",
-      'smileyURL' =>$this->getPath() . 'smileys/very_emotional_emoticons-png/png-32x32/',
-      'addUrl' => " ",
-      'notificationSound' => $this->settings['notification_sound']?'1':'2',
-      'basePath' => "/",
-      'useStopWordList' => $this->settings['use_stop_word_list'],
-      'blockHL' => $this->settings['stop_links'],
-      'allowAnonHL' => ($this->settings['allow_anon_links'])?'1':'2',
-      'iup' => ($this->settings['user_picture'])?'1':'2',
-      'theme' => $this->settings['theme'],
-      'changeurl' => $this->getPath() . 'ajax-change-guest-name.php',
-      'renderImageInline' => $this->settings['allow_render_images']?'1':'2',
-      'searchBar' => $this->settings['enable_search_bar']?'1':'2',
-      'allowSmileys' => $this->settings['enable_smileys']?'1':'2',
-      'guestPrefix' => $this->settings['anon_prefix'] . " ",
-      'mobileWebUrl' => $this->getPath() .  $this->settings['mobile_file'],
-      'chat_type' => $this->settings['chat_type'],
-      //'admin' => $jsset['is_admin']?'1':'0',
-      //'session_key' => $jsset['key'],
-    );
-	  
-    if(!$this->settings['load_async']) {
-      $my_settings['uid'] = $jsset['uid'];
-      $my_settings['username'] = $jsset['name'];
-      $my_settings['admin'] = $jsset['is_admin']?'1':'0';
-      $my_settings['session_key'] = $jsset['key'];
+    protected function t($key)
+    {
+        return $key;
     }
-        
-	  if($this->settings['use_stop_word_list'] != '1') {
-	    $my_settings['stopWordList'] = $this->settings['stop_word_list'];
-	  }
+    /*
+     * Method for sending HTTP Request
+     */
+    protected function extendedHttpRequest($url, $data_json)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        $res_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $result = json_decode($result);
+        $result->code = $res_code;
+        curl_close($ch);
 
-    if($this->settings['load_async']) {
-      $my_settings['exurl'] = $this->getPath() .  $this->settings['ajax_file'];
-    }
-  
-    if($this->settings['minimize_chat_user_list']) {
-      $my_settings['open_chatlist_default'] = "2";
-    }
-    else {
-      $my_settings['open_chatlist_default'] = "1";
-    }
-
-    if($this->checkSSL()) {
-      $my_settings['external_host'] = $this->settings['A_HOST'];
-      $my_settings['external_port'] = $this->settings['A_PORT'];
-      $my_settings['external_a_host'] = $this->settings['A_HOST'];
-      $my_settings['external_a_port'] = $this->settings['A_PORT'];		
-	  }
-    else {
-      $my_settings['external_host'] = $this->settings['HOST'];
-      $my_settings['external_port'] = $this->settings['PORT'];
-      $my_settings['external_a_host'] = $this->settings['HOST'];
-      $my_settings['external_a_port'] = $this->settings['PORT'];
-	  }	
-	  if($this->settings['user_picture'] && !$this->settings['load_async']) {
-		  if(isset($jsset['avatar_url'])) {
-	      $my_settings['up'] = $jsset['avatar_url'];
-        }
-        else {
-         $my_settings['up'] = $this->getPath() . 'themes/' . $this->settings['theme'] . '/images/default_avatar.png';
-        }
-    }
-    
-    $my_settings['default_up'] = $this->getPath() . 'themes/' . $this->settings['theme'] . '/images/default_avatar.png';
-    $my_settings['default_cr'] = $this->getPath() . 'themes/' . $this->settings['theme'] . '/images/default_room.png';
-    
-    $my_settings['text_currently_offline'] = $this->t('drupalchat_user is currently offline.');
-    $my_settings['text_is_typing'] = $this->t('drupalchat_user is typing...');  
-    $my_settings['text_close'] = $this->t('Close');
-    $my_settings['text_minimize'] = $this->t('Minimize');
-    $my_settings['text_mute'] = $this->t('Click to Mute');
-    $my_settings['text_unmute'] = $this->t('Click to Unmute');
-    $my_settings['text_available'] = $this->t('Available');
-    $my_settings['text_idle'] = $this->t('Idle');
-    $my_settings['text_busy'] = $this->t('Busy');
-    $my_settings['text_offline'] = $this->t('Offline'); 
-    $my_settings['text_search_bar'] = $this->t('Type here to search'); 
-    $my_settings['text_user_list_reconnect'] = $this->t('Connecting...');
-    $my_settings['text_user_list_loading'] = $this->t('Loading...');
-
-    if($jsset['is_admin']) {
-      $my_settings['text_ban']                = $this->t('Ban');
-      $my_settings['text_ban_ip']             = $this->t('Ban IP');
-      $my_settings['text_kick']               = $this->t('Kick');
-      $my_settings['text_ban_window_title']   = $this->t('Banned Users');
-      $my_settings['text_ban_window_default'] = $this->t('No users have been banned currently.');
-      $my_settings['text_ban_window_loading'] = $this->t('Loading banned user list...');
-    }
-
-    if(!$this->settings['load_async']) {
-      if(isset($jsset['upl']) && $jsset['upl']) {
-        $my_settings['upl'] = $jsset['upl'];
-      }
-      else {
-        $my_settings['upl'] = 'user/' . $jsset['uid'];
-      }  
-	  }
-  
-    return $my_settings;
-    
-  }
-  
-  private function timerRead($name) {
-    //global $this->timers;
-
-    if (isset($this->timers[$name]['start'])) {
-      $stop = microtime(TRUE);
-      $diff = round(($stop - $this->timers[$name]['start']) * 1000, 2);
-
-      if (isset($this->timers[$name]['time'])) {
-        $diff += $this->timers[$name]['time'];
-      }
-      return $diff;
-    }
-    return $this->timers[$name]['time'];
-  } 
-
-  private function timerstart($name) {
-    //global $this->timers;
-
-    $this->timers[$name]['start'] = microtime(TRUE);
-    $this->timers[$name]['count'] = isset($this->timers[$name]['count']) ? ++$this->timers[$name]['count'] : 1;
-  }
-  
-  /*
-   * Method for sending HTTP Request
-   */
-  protected function extendedHttpRequest($url, array $options = array()) {
-//    $result = new stdClass();
-      $result = array();
-      $result = (object)$result;
-    // Parse the URL and make sure we can handle the schema.
-    $uri = @parse_url($url);
-    if ($uri == FALSE) {
-      $result->error = 'unable to parse URL';
-      $result->code = -1001;
-      return $result;
-    }
-
-    if (!isset($uri['scheme'])) {
-      $result->error = 'missing schema';
-      $result->code = -1002;
-      return $result;
-    }
-
-    $this->timerstart(__FUNCTION__);
-
-    // Merge the default options.
-    $options += array(
-      'headers' => array(), 
-      'method' => 'GET', 
-      'data' => NULL, 
-      'max_redirects' => 3, 
-      'timeout' => 30.0, 
-      'context' => NULL,
-    );
-
-    // Merge the default headers.
-    $options['headers'] += array(
-      'User-Agent' => 'Drupal (+http://drupal.org/)',
-    );
-
-    // stream_socket_client() requires timeout to be a float.
-    $options['timeout'] = (float) $options['timeout'];
-
-    // Use a proxy if one is defined and the host is not on the excluded list.
-    $proxy_server = '';
-    if ($proxy_server && _drupal_http_use_proxy($uri['host'])) {
-      // Set the scheme so we open a socket to the proxy server.
-      $uri['scheme'] = 'proxy';
-      // Set the path to be the full URL.
-      $uri['path'] = $url;
-      // Since the URL is passed as the path, we won't use the parsed query.
-      unset($uri['query']);
-
-      // Add in username and password to Proxy-Authorization header if needed.
-      if ($proxy_username = '') {
-        $proxy_password = '';
-        $options['headers']['Proxy-Authorization'] = 'Basic ' . base64_encode($proxy_username . (!empty($proxy_password) ? ":" . $proxy_password : ''));
-      }
-      // Some proxies reject requests with any User-Agent headers, while others
-      // require a specific one.
-      $proxy_user_agent = '';
-      // The default value matches neither condition.
-      if ($proxy_user_agent === NULL) {
-        unset($options['headers']['User-Agent']);
-      }
-      elseif ($proxy_user_agent) {
-        $options['headers']['User-Agent'] = $proxy_user_agent;
-      }
-    }
-
-    switch ($uri['scheme']) {
-      case 'proxy':
-        // Make the socket connection to a proxy server.
-        $socket = 'tcp://' . $proxy_server . ':' . 8080;
-        // The Host header still needs to match the real request.
-        $options['headers']['Host'] = $uri['host'];
-        $options['headers']['Host'] .= isset($uri['port']) && $uri['port'] != 80 ? ':' . $uri['port'] : '';
-        break;
-
-      case 'http':
-      case 'feed':
-        $port = isset($uri['port']) ? $uri['port'] : 80;
-        $socket = 'tcp://' . $uri['host'] . ':' . $port;
-        // RFC 2616: "non-standard ports MUST, default ports MAY be included".
-        // We don't add the standard port to prevent from breaking rewrite rules
-        // checking the host that do not take into account the port number.
-        $options['headers']['Host'] = $uri['host'] . ($port != 80 ? ':' . $port : '');
-        break;
-
-      case 'https':
-        // Note: Only works when PHP is compiled with OpenSSL support.
-        $port = isset($uri['port']) ? $uri['port'] : 443;
-        $socket = 'ssl://' . $uri['host'] . ':' . $port;
-        $options['headers']['Host'] = $uri['host'] . ($port != 443 ? ':' . $port : '');
-        break;
-
-      default:
-        $result->error = 'invalid schema ' . $uri['scheme'];
-        $result->code = -1003;
         return $result;
     }
 
-    if (empty($options['context'])) {
-      $fp = @stream_socket_client($socket, $errno, $errstr, $options['timeout']);
-    }
-    else {
-      // Create a stream with context. Allows verification of a SSL certificate.
-      $fp = @stream_socket_client($socket, $errno, $errstr, $options['timeout'], STREAM_CLIENT_CONNECT, $options['context']);
-    }
-
-    // Make sure the socket opened properly.
-    if (!$fp) {
-      // When a network error occurs, we use a negative number so it does not
-      // clash with the HTTP status codes.
-      $result->code = -$errno;
-      $result->error = trim($errstr) ? trim($errstr) : $this->t('Error opening socket @socket', array('@socket' => $socket));
-
-      // Mark that this request failed. This will trigger a check of the web
-      // server's ability to make outgoing HTTP requests the next time that
-      // requirements checking is performed.
-      // See system_requirements().
-      //variable_set('drupal_http_request_fails', TRUE);
-
-      return $result;
-    }
-
-    // Construct the path to act on.
-    $path = isset($uri['path']) ? $uri['path'] : '/';
-    if (isset($uri['query'])) {
-      $path .= '?' . $uri['query'];
-    }
-
-    // Only add Content-Length if we actually have any content or if it is a POST
-    // or PUT request. Some non-standard servers get confused by Content-Length in
-    // at least HEAD/GET requests, and Squid always requires Content-Length in
-    // POST/PUT requests.
-    $content_length = strlen($options['data']);
-    if ($content_length > 0 || $options['method'] == 'POST' || $options['method'] == 'PUT') {
-      $options['headers']['Content-Length'] = $content_length;
-    }
-
-    // If the server URL has a user then attempt to use basic authentication.
-    if (isset($uri['user'])) {
-      $options['headers']['Authorization'] = 'Basic ' . base64_encode($uri['user'] . (isset($uri['pass']) ? ':' . $uri['pass'] : ''));
-    }
-
-    // If the database prefix is being used by SimpleTest to run the tests in a copied
-    // database then set the user-agent header to the database prefix so that any
-    // calls to other Drupal pages will run the SimpleTest prefixed database. The
-    // user-agent is used to ensure that multiple testing sessions running at the
-    // same time won't interfere with each other as they would if the database
-    // prefix were stored statically in a file or database variable.
-    $test_info = &$GLOBALS['drupal_test_info'];
-    if (!empty($test_info['test_run_id'])) {
-      $options['headers']['User-Agent'] = drupal_generate_test_ua($test_info['test_run_id']);
-    }
-
-    $request = $options['method'] . ' ' . $path . " HTTP/1.0\r\n";
-    foreach ($options['headers'] as $name => $value) {
-      $request .= $name . ': ' . trim($value) . "\r\n";
-    }
-    $request .= "\r\n" . $options['data'];
-    $result->request = $request;
-    // Calculate how much time is left of the original timeout value.
-    $timeout = $options['timeout'] - $this->timerRead(__FUNCTION__) / 1000;
-    if ($timeout > 0) {
-      stream_set_timeout($fp, floor($timeout), floor(1000000 * fmod($timeout, 1)));
-      fwrite($fp, $request);
-    }
-
-    // Fetch response. Due to PHP bugs like http://bugs.php.net/bug.php?id=43782
-    // and http://bugs.php.net/bug.php?id=46049 we can't rely on feof(), but
-    // instead must invoke stream_get_meta_data() each iteration.
-    $info = stream_get_meta_data($fp);
-    $alive = !$info['eof'] && !$info['timed_out'];
-    $response = '';
-
-    while ($alive) {
-      // Calculate how much time is left of the original timeout value.
-      $timeout = $options['timeout'] - $this->timerRead(__FUNCTION__) / 1000;
-      if ($timeout <= 0) {
-        $info['timed_out'] = TRUE;
-        break;
-      }
-      stream_set_timeout($fp, floor($timeout), floor(1000000 * fmod($timeout, 1)));
-      $chunk = fread($fp, 1024);
-      $response .= $chunk;
-      $info = stream_get_meta_data($fp);
-      $alive = !$info['eof'] && !$info['timed_out'] && $chunk;
-    }
-    fclose($fp);
-
-    if ($info['timed_out']) {
-      $result->code = HTTP_REQUEST_TIMEOUT;
-      $result->error = 'request timed out';
-      return $result;
-    }
-    // Parse response headers from the response body.
-    // Be tolerant of malformed HTTP responses that separate header and body with
-    // \n\n or \r\r instead of \r\n\r\n.
-    list($response, $result->data) = preg_split("/\r\n\r\n|\n\n|\r\r/", $response, 2);
-    $response = preg_split("/\r\n|\n|\r/", $response);
-
-    // Parse the response status line.
-    list($protocol, $code, $status_message) = explode(' ', trim(array_shift($response)), 3);
-    $result->protocol = $protocol;
-    $result->status_message = $status_message;
-
-    $result->headers = array();
-
-    // Parse the response headers.
-    while ($line = trim(array_shift($response))) {
-      list($name, $value) = explode(':', $line, 2);
-      $name = strtolower($name);
-      if (isset($result->headers[$name]) && $name == 'set-cookie') {
-        // RFC 2109: the Set-Cookie response header comprises the token Set-
-        // Cookie:, followed by a comma-separated list of one or more cookies.
-        $result->headers[$name] .= ',' . trim($value);
-      }
-      else {
-        $result->headers[$name] = trim($value);
-      }
-    }
-
-    $responses = array(
-      100 => 'Continue', 
-      101 => 'Switching Protocols', 
-      200 => 'OK', 
-      201 => 'Created', 
-      202 => 'Accepted', 
-      203 => 'Non-Authoritative Information', 
-      204 => 'No Content', 
-      205 => 'Reset Content', 
-      206 => 'Partial Content', 
-      300 => 'Multiple Choices', 
-      301 => 'Moved Permanently', 
-      302 => 'Found', 
-      303 => 'See Other', 
-      304 => 'Not Modified', 
-      305 => 'Use Proxy', 
-      307 => 'Temporary Redirect', 
-      400 => 'Bad Request', 
-      401 => 'Unauthorized', 
-      402 => 'Payment Required', 
-      403 => 'Forbidden', 
-      404 => 'Not Found', 
-      405 => 'Method Not Allowed', 
-      406 => 'Not Acceptable', 
-      407 => 'Proxy Authentication Required', 
-      408 => 'Request Time-out', 
-      409 => 'Conflict', 
-      410 => 'Gone', 
-      411 => 'Length Required', 
-      412 => 'Precondition Failed', 
-      413 => 'Request Entity Too Large', 
-      414 => 'Request-URI Too Large', 
-      415 => 'Unsupported Media Type', 
-      416 => 'Requested range not satisfiable', 
-      417 => 'Expectation Failed', 
-      500 => 'Internal Server Error', 
-      501 => 'Not Implemented', 
-      502 => 'Bad Gateway', 
-      503 => 'Service Unavailable', 
-      504 => 'Gateway Time-out', 
-      505 => 'HTTP Version not supported',
-    );
-    // RFC 2616 states that all unknown HTTP codes must be treated the same as the
-    // base code in their class.
-    if (!isset($responses[$code])) {
-      $code = floor($code / 100) * 100;
-    }
-    $result->code = $code;
-
-    switch ($code) {
-      case 200: // OK
-      case 304: // Not modified
-        break;
-      case 301: // Moved permanently
-      case 302: // Moved temporarily
-      case 307: // Moved temporarily
-        $location = $result->headers['location'];
-        $options['timeout'] -= $this->timerRead(__FUNCTION__) / 1000;
-        if ($options['timeout'] <= 0) {
-          $result->code = HTTP_REQUEST_TIMEOUT;
-          $result->error = 'request timed out';
+    /*
+     * Get auth (key, css) from iFlyChat
+     */
+    private function getKey()
+    {
+        $id = $this->getUserId();
+        $name = $this->getUserName();
+        if ($id && $name) {
+            $data = array(
+                'uname' => $name,
+                'uid' => $id,
+                'api_key' => $this->settings['api_key'],
+                'image_path' => $this->getPath() . 'themes/' . $this->settings['theme'] . '/images',
+                'isLog' => TRUE,
+                'whichTheme' => 'blue',
+                'enableStatus' => TRUE,
+                'role' => ($this->user_details['is_admin']) ? "admin" : "normal",
+                'validState' => array('available', 'offline', 'busy', 'idle'),
+            );
         }
-        elseif ($options['max_redirects']) {
-          // Redirect to the new location.
-          $options['max_redirects']--;
-          $result = $this->extendedHttpRequest($location, $options);
-          $result->redirect_code = $code;
+
+        if ($this->user_details['is_admin']) {
+            $data['role'] = "admin";
+            $data['allRoles'] = $this->user_details['all_roles'];
+        } else {
+            $data['role'] = array();
+            foreach ($this->user_details['room_roles'] as $rkey => $rvalue) {
+                $data['role'][$rkey] = $rvalue;
+            }
         }
-        if (!isset($result->redirect_url)) {
-          $result->redirect_url = $location;
+
+        if ($this->settings['user_picture']) {
+            $data['up'] = $this->getUserPictureUrl();
         }
-        break;
-      default:
-        $result->error = $status_message;
+
+        $data['upl'] = $this->getUserProfileLink();
+
+        if ($this->settings['enable_user_relationships']) {
+            if (isset($this->user_details['relationships_set'])) {
+                $data['rel'] = '1';
+                $data['valid_uids'] = $this->user_details['relationships_set'];
+            }
+        } else {
+            $data['rel'] = '0';
+        }
+
+        if ($this->settings['enable_user_group_filtering']) {
+            $data['rel'] = '0';
+            $data['valid_groups'] = array();
+            foreach ($this->user_details['user_groups'] as $rkey => $rvalue) {
+                $data['valid_groups'][$rkey] = $rvalue;
+            }
+        }
+        $data = json_encode($data);
+        $result = $this->extendedHttpRequest($this->settings['HOST'] . ':' . $this->settings['PORT'] . '/api/1.0/token/generate', $data);
+        if ($result->code == 200) {
+            if ($this->getUserId() && $this->getUserName()) {
+                $_SESSION['token'] = $result->key;
+            };
+            return $result;
+        } else {
+            return array();
+        }
     }
 
-    return $result;
-  }
-  
-  /*
-   * Get auth (key, css) from iFlyChat
-   */
-  private function getKey() {
-    //global $_iflychat, $iflychat;
-    /*if(isset($_COOKIE['iflychat_c']) && isset($_COOKIE['iflychat_d'])) {
-      echo rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, md5($_COOKIE['iflychat_d']), base64_decode($_COOKIE['iflychat_c']), MCRYPT_MODE_CBC, md5(md5($_COOKIE['iflychat_d']))), "\0");
-    } */
-    
-    $id = $this->getUserId();
-    $name = $this->getUserName();
-    
-    $data = array(
-      'uname' => $name,
-      'uid' => $id,
-      'api_key' => $this->settings['api_key'],
-      'image_path' => $this->getPath() . 'themes/' . $this->settings['theme'] . '/images',
-      'isLog' => TRUE,
-      'whichTheme' => 'blue',
-      'enableStatus' => TRUE,
-      'role' => ($this->user_details['is_admin'])?"admin":"normal",
-      'validState' => array('available','offline','busy','idle'),
-    );
-
-    if($this->user_details['is_admin']) {
-      $data['role'] = "admin";
-      $data['allRoles'] = $this->user_details['all_roles'];
-    }
-    else {
-      $data['role'] = array();
-      foreach ($this->user_details['room_roles'] as $rkey => $rvalue) {
-        $data['role'][$rkey] = $rvalue;
-      }
-    }
-    
-    if($this->settings['user_picture']) {
-      $data['up'] = $this->getUserPictureUrl();
+    /*
+     * Check if server is SSL secure
+     */
+    private function checkSSL()
+    {
+        return (isset($_SERVER) && isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != "off"));
     }
 
-    $data['upl'] = $this->getUserProfileLink();
+    /*
+     * Get url for user avatar
+     */
+    private function getUserPictureUrl()
+    {
+        if (!($this->user_details['avatar_url'])) {
+            $this->user_details['agetUserId()vatar_url'] = $this->getPath() . 'themes/' . $this->settings['theme'] . '/images/default_avatar.png';
+        }
+        return $this->user_details['avatar_url'];
+    }
 
-    if($this->settings['enable_user_relationships']) {
-      if(isset($this->user_details['relationships_set'])) {
-        $data['rel'] = '1';
-        $data['valid_uids'] = $this->user_details['relationships_set'];
-      }
-    }
-    else {
-      $data['rel'] = '0';
+    /*
+     * Get url for user profile
+     */
+    private function getUserProfileLink()
+    {
+        if (!($this->user_details['upl'])) {
+            $this->user_details['upl'] = 'javascript:void(0)';
+        }
+        return $this->user_details['upl'];
     }
 
-    if($this->settings['enable_user_group_filtering']) {
-      $data['rel'] = '0';
-      $data['valid_groups'] = array();
-      foreach ($this->user_details['user_groups'] as $rkey => $rvalue) {
-        $data['valid_groups'][$rkey] = $rvalue;
-      }
+    /*
+     * Get ID for current User (Guest/Registered)
+     */
+    private function getUserId()
+    {
+        if (($this->user_details['id'])) {
+            $_SESSION['iflychat_id'] = $this->user_details['id'];
+            return $this->user_details['id'];
+        } else {
+            return false;
+        }
     }
-    
-    $data = json_encode($data);
-    $options = array(
-      'method' => 'POST',
-      'data' => $data,
-      'timeout' => 15,
-      'headers' => array('Content-Type' => 'application/json'),
-    );
-    $result = NULL;
-    $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] . '/p/', $options);
-    if($result->code == 200) {
-      $result = json_decode($result->data);
-      $result->name = $name;
-      $result->uid = $id;
-      $up= array('up'=>$this->getUserPictureUrl());
-      $result = (object) array_merge((array) $result, (array) $up);
-      //print_r($result);
-      return $result;
-    }
-    else {
-      return array();
-    }
-  }
-  
-  /*
-   * Check if server is SSL secure
-   */
-  private function checkSSL() {
-    return (isset($_SERVER) && isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != "off"));
-  }
-  
-  /*
-   * Get url for user avatar
-   */
-  private function getUserPictureUrl() {
-    if(!($this->user_details['avatar_url']))  {
-      $this->user_details['avatar_url'] = $this->getPath() . 'themes/' . $this->settings['theme'] . '/images/default_avatar.png';
-    }
-    return $this->user_details['avatar_url'];
-  }
-  
-  /*
-   * Get url for user profile
-   */
-  private function getUserProfileLink() {
-    if(!($this->user_details['upl'])) {
-      $this->user_details['upl'] = 'javascript:void(0)';
-    }
-    return $this->user_details['upl'];
-  }
-  
-  /*
-   * Get ID for current User (Guest/Registered)
-   */
-  private function getUserId() {
-    if(($this->user_details['id'])) {
-      $_SESSION['iflychat_id'] = $this->user_details['id'];
-      return $this->user_details['id'];
-    } 
-    else {
-      return "0-".$this->getCurrentGuestId();
-    }
-  }
-  
-  /*
-   * Get name for current User (Guest/Registered)
-   */
-  private function getUserName() {
-    if(isset($this->user_details['name'])) {
-      $_SESSION['iflychat_name'] = $this->user_details['name'];
-      return $this->user_details['name'];
-    } 
-    else {
-      return $this->getCurrentGuestName();
-    }
-  }
-  
-  /*
-   * Get name for guest User
-   */
-  private function getCurrentGuestName() {
-    if(isset($_SESSION) && isset($_SESSION['iflychat_guest_name'])) {
-      //if(!isset($_COOKIE) || !isset($_COOKIE['drupalchat_guest_name'])) {
-      setrawcookie('iflychat_guest_name', rawurlencode($_SESSION['iflychat_guest_name']), time()+60*60*24*365, '/');
-      //}
-    }
-    else if(isset($_COOKIE) && isset($_COOKIE['iflychat_guest_name']) && isset($_COOKIE['iflychat_guest_session'])&& ($_COOKIE['iflychat_guest_session']==$this->computeGuestSession($this->getCurrentGuestId()))) {
-      $_SESSION['iflychat_guest_name'] = $this->checkPlain($_COOKIE['iflychat_guest_name']);
-    }
-    else {
-      if($this->settings['anon_use_name']) {
-        $_SESSION['iflychat_guest_name'] = $this->checkPlain($this->settings['anon_prefix'] . ' ' . $this->getRandomName());
-      }
-      else {
-        $_SESSION['iflychat_guest_name'] = $this->checkPlain($this->settings['anon_prefix'] . time());
-      }
-      setrawcookie('iflychat_guest_name', rawurlencode($_SESSION['iflychat_guest_name']), time()+60*60*24*365, '/');
-    }
-    return $_SESSION['iflychat_guest_name'];
-  }
 
-  /*
-   * Get ID for guest User
-   */
-  private function getCurrentGuestId() {
-    if(isset($_SESSION) && isset($_SESSION['iflychat_guest_id'])) {
-      //if(!isset($_COOKIE) || !isset($_COOKIE['drupalchat_guest_id'])) {
-      setrawcookie('iflychat_guest_id', rawurlencode($_SESSION['iflychat_guest_id']), time()+60*60*24*365, '/');
-      setrawcookie('iflychat_guest_session', rawurlencode($_SESSION['iflychat_guest_session']), time()+60*60*24*365, '/');
-      //}
+    /*
+     * Get name for current User (Guest/Registered)
+     */
+    private function getUserName()
+    {
+        if (isset($this->user_details['name'])) {
+            $_SESSION['iflychat_name'] = $this->user_details['name'];
+            return $this->user_details['name'];
+        } else {
+            return false;
+        }
     }
-    else if(isset($_COOKIE) && isset($_COOKIE['iflychat_guest_id']) && isset($_COOKIE['iflychat_guest_session']) && ($_COOKIE['iflychat_guest_session']==$this->computeGuestSession($_COOKIE['iflychat_guest_id']))) {
-      $_SESSION['iflychat_guest_id'] = $this->checkPlain($_COOKIE['iflychat_guest_id']);
-      $_SESSION['iflychat_guest_session'] = $this->checkPlain($_COOKIE['iflychat_guest_session']);
+
+    public function getMessageThread($id1 = "1", $id2 = "2")
+    {
+        //global $_iflychat, $iflychat;
+        $data = json_encode(array(
+            'uid1' => $id1,
+            'uid2' => $id2,
+            'api_key' => $this->settings['api_key'],
+        ));
+        $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] . '/q/', $data);
+        $q = json_decode($result->data);
+        return $q;
     }
-    else {
-      $characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-      $iflychatId = time();
-      for ($i = 0; $i < 5; $i++) {
-       $iflychatId .= $characters[rand(0, strlen($characters) - 1)];
-      }
-      $_SESSION['iflychat_guest_id'] = $iflychatId;
-      $_SESSION['iflychat_guest_session'] = $this->computeGuestSession($_SESSION['iflychat_guest_id']);
-      setrawcookie('iflychat_guest_id', rawurlencode($_SESSION['iflychat_guest_id']), time()+60*60*24*365, '/');
-      setrawcookie('iflychat_guest_session', rawurlencode($_SESSION['iflychat_guest_session']), time()+60*60*24*365, '/');
+
+    public function getMessageInbox($id1 = "1")
+    {
+        //global $_iflychat, $iflychat;
+        $data = json_encode(array(
+            'uid' => $id1,
+            'api_key' => $this->settings['api_key'],
+        ));
+        $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] . '/r/', $data);
+        $q = json_decode($result->data);
+        return $q;
     }
-    return $_SESSION['iflychat_guest_id'];
-  }
 
-  /*
-   * Compute Guest Session key to identify cookie 
-   */
-  function computeGuestSession($id) {
-    return md5(substr($this->settings['api_key'], 0, 5) . $id);
-  }
-/*
-  private function checkSessionGuest() {
-    return (isset($_SESSION['iflychat_id']) && ($_SESSION['iflychat_id'][0] == "0") && ($_SESSION['iflychat_id'][1] == "-"));
-  }
-  
-  private function getGuestNewId() {
-    $characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    $id = '0-'.time();
-    for ($i = 0; $i < 5; $i++) {
-      $id .= $characters[rand(0, strlen($characters) - 1)];
+    public function renderChatMobile()
+    {
+
+        $data = array('settings' => array());
+        $data['settings']['authUrl'] = $this->getBaseUrl() . $this->settings['ajax_file'];
+        $data['settings']['host'] = (($this->checkSSL()) ? ($this->settings['A_HOST']) : ($this->settings['HOST']));
+        $data['settings']['port'] = (($this->checkSSL()) ? ($this->settings['A_PORT']) : ($this->settings['PORT']));
+        $data = json_encode($data);
+
+        $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] . '/m/v1/app/', $data);
+
+        return $result->data;
     }
-    return $id;
-  }
- */ 
-  private function getRandomName() {
-    $path = $this->getPath() . "guest_names/guest_random_names.txt";
-    $f_contents = file($path); 
-    $line = trim($f_contents[rand(0, count($f_contents) - 1)]);
-
-    return $line;
-  }
- 
-
-  /*
-   * Check string for html special characters and convert them
-   */ 
-  public function checkPlain($text) {
-   return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-  }
-
-  /*
-   * Method to change current guest name. Is callback to ajax-change-guest-name.php
-   */
-  public function changeGuestName() {
-    if(($this->user_details['id'] == 0) && isset($_POST) && isset($_POST['drupalchat_guest_new_name']) && ($this->settings['anon_change_name']==TRUE)) {
-      $new_name = $this->checkPlain($this->settings['anon_prefix'] . " " . $_POST['drupalchat_guest_new_name']);
-      $_SESSION['iflychat_guest_name'] = $new_name;
-      setrawcookie('iflychat_guest_name', rawurlencode($new_name), time()+60*60*24*365, '/');
-      header("Content-Type: application/json");
-      echo json_encode(array());
-      exit;
-    }
-    else {
-      header("Content-Type: application/json");
-      echo json_encode(array());
-      exit;
-    }
-  }
-
-  private function hashBase64($data) {
-    $hash = base64_encode(hash('sha256', $data, TRUE));
-    return strtr($hash, array('+' => '-', '/' => '_', '=' => ''));
-  }
-
-  /*
-   * Updates iFlyChat settings on the server. Is callback to iflychat_save_settings.php
-   */
-  public function updateSettings() {
-    //global $_iflychat, $iflychat;
-    $data = array(
-      'api_key' => $this->settings['api_key'],
-      'enable_chatroom' => ($this->settings['public_chatroom'])?'1':'2',
-      'theme' => $this->settings['theme'],
-      'notify_sound' => ($this->settings['notification_sound'])?'1':'2',
-      'smileys' => ($this->settings['enable_smileys'])?'1':'2',
-      'log_chat' => ($this->settings['log_chat'])?'1':'2',
-      'chat_topbar_color' => $this->settings['chat_topbar_color'],
-      'chat_topbar_text_color' => $this->settings['chat_topbar_text_color'],
-      'font_color' => $this->settings['chat_font_color'],
-      'chat_list_header' => $this->settings['chat_list_header'],
-      'public_chatroom_header' => $this->settings['public_chatroom_header'],
-      'rel' => ($this->settings['enable_user_relationships'])?'1':'0',
-      'version' => $this->settings['version'],
-      'show_admin_list' => ($this->settings['chat_type'] == '2')?'1':'2',
-      'clear' => $this->settings['allow_single_message_delete'],
-      'delmessage' => $this->settings['allow_clear_room_history'],
-      'ufc' => ($this->settings['allow_user_font_color'])?'1':'2',    
-      'guest_prefix' => $this->settings['anon_prefix'] . " ",
-      'enable_guest_change_name' => $this->settings['anon_change_name']?'1':'2',
-      'use_stop_word_list' => $this->settings['use_stop_word_list'],
-      'stop_word_list' => $this->settings['stop_word_list'],
-      'file_attachment' => ($this->settings['enable_file_attachment'])?'1':'2',
-      'mobile_browser_app' => ($this->settings['enable_mobile_browser_app'])?'1':'2',
-      'enable_groups' => ($this->settings['enable_user_group_filtering'])?'1':'2',
-    );
-    
-    $data = json_encode($data);
-      
-    $options = array(
-      'method' => 'POST',
-      'data' => $data,
-      'timeout' => 15,
-      'headers' => array('Content-Type' => 'application/json'),
-    );
-    
-    $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] .  '/z/', $options);
-    if($result->code == 200) {
-      //$result = json_decode($result->data);
-      return $result;
-    }
-    else {
-      return $result;
-      //form_set_error('drupalchat_external_api_key', "Unable to connect to iFlyChat server. Error code - " . $result->code . ". Error message - " . $result->error . ".");
-    }
-  }
-
-  public function getMessageThread($id1 = "1", $id2 = "2") {
-    //global $_iflychat, $iflychat;
-    $data = json_encode(array(
-      'uid1' => $id1,
-      'uid2' => $id2,
-      'api_key' => $this->settings['api_key'],
-      ));
-    $options = array(
-      'method' => 'POST',
-      'data' => $data,
-      'timeout' => 15,
-      'headers' => array('Content-Type' => 'application/json'),
-      );
-    $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] .  '/q/', $options);
-    $q = json_decode($result->data);
-    return $q;
-  }
-
-  public function getMessageInbox($id1 = "1") {
-    //global $_iflychat, $iflychat;
-    $data = json_encode(array(
-      'uid' => $id1,
-      'api_key' => $this->settings['api_key'],
-      ));
-    $options = array(
-      'method' => 'POST',
-      'data' => $data,
-      'timeout' => 15,
-      'headers' => array('Content-Type' => 'application/json'),
-      );
-    $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] .  '/r/', $options);
-    $q = json_decode($result->data);
-    return $q;
-  }
-
-  public function renderChatMobile() {
-
-    $data = array('settings' => array());
-    $data['settings']['authUrl'] = $this->getBaseUrl() .  $this->settings['ajax_file'];
-    $data['settings']['host'] = (($this->checkSSL())?($this->settings['A_HOST']):($this->settings['HOST']));
-    $data['settings']['port'] = (($this->checkSSL())?($this->settings['A_PORT']):($this->settings['PORT']));
-    $data = json_encode($data);
-    
-    $options = array(
-      'method' => 'POST',
-      'data' => $data,
-      'timeout' => 15,
-      'headers' => array('Content-Type' => 'application/json'),
-      );
-    $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] .  '/m/v1/app/', $options);
-    
-    return $result->data;
-  }
 }
