@@ -4,9 +4,9 @@
  * Ensure that path to iFlyChat PHP SDK files are correct
  *
 **/
-require_once('./iflychatsettings.php');
-require_once('./iflychatuserdetails.php');
 require_once('./iflychat.php');
+const API_KEY = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+const APP_ID =  'XXXXXX-XXXX-XXXXX-XXXXXX';
 
 /**
  *
@@ -14,10 +14,15 @@ require_once('./iflychat.php');
  * This code should be printed on all pages where you want chat to be present.
  *
 **/
-global $iflychat_userinfo;
-$iflychat_settings = new iFlyChatSettings();
-$iflychat = new iFlyChat($iflychat_settings->iflychat_settings, $iflychat_userinfo->getUserDetails());
+$user = array(
+  'user_name' => 'test',
+  'user_id' => '2'
+);
+$iflychat = new iFlyChat(API_KEY, APP_ID);
+//$iflychat->setUser($user);
+//$iflychat->setAvatarUrl('https://pixabay.com/static/uploads/photo/2014/12/22/00/07/tree-576847_960_720.png');
 $ifly_html_code = $iflychat->getHtmlCode();
+
 
 ?>
 <html>
