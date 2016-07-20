@@ -8,7 +8,7 @@ class iFlyChat
     /*
      * Initialise iFlyChat class with settings and user details array
      */
-    function __construct($api_key = '', $app_id = '')
+    function __construct($api_key = '', $app_id = '', $settings = array())
     {
 
         if (version_compare(phpversion(), '5.4.0', '>=')) {
@@ -35,13 +35,14 @@ class iFlyChat
         $this->settings = array(
             'base' => '',
             'version' => 'PHP-1.1.1',
-            'HOST' => 'http://web.iflychatdev.com',
-            'A_HOST' => 'https://web.iflychatdev.com',
+            'HOST' => 'http://api.iflychatdev.com',
+            'A_HOST' => 'https://api.iflychatdev.com',
             'PORT' => 40080,
             'A_PORT' => 40443,
         );
         $this->settings['api_key'] = $api_key;
         $this->settings['app_id'] = $app_id;
+        $this->settings['popup'] = $settings['SHOW_POP_UP_CHAT'];
     }
 
 
@@ -67,10 +68,20 @@ class iFlyChat
     public function getHtmlCode()
     {
         $r = '';
+
+        if ($this->settings['popup'] === true) {
+            $r .= '<script>var iFlyChatDiv = document.createElement("div");';
+            $r .= 'iFlyChatDiv.id = \'iflychat-popup\';';
+            $r .= 'iFlyChatDiv.style.zIndex = \'2147483647\';';
+            $r .= 'iFlyChatDiv.style.position = \'relative\';';
+            $r .= 'document.body.appendChild(iFlyChatDiv);';
+            $r .= '</script>';
+
+        }
+
         $token = $this->getToken();
-        if($token) $r .= '<script> var iflychat_auth_token = "' . $token . '";</script>';
-        $r .= '<div id="app"></div>';
-        $r .= '<script type="text/javascript" src="//web.iflychatdev.com:9000/js/bundle.js?cid='
+        if ($token) $r .= '<script> var iflychat_auth_token = "' . $token . '";</script>';
+        $r .= '<script type="text/javascript" src="//10.64.137.161:9000/js/bundle.js?cid='
             . $this->settings['app_id'] . '"</script>';
         return $r;
     }
@@ -126,10 +137,12 @@ class iFlyChat
             'user_id' => $user['user_id'],
             'api_key' => $this->settings['api_key'],
             'user_roles' => ($this->user_details['is_admin']) ? "admin" : "normal",
+            'app_id' => $this->settings['app_id'],
+            'version' => $this->settings['version']
         );
         if (isset($this->user_details['is_admin'])) {
             $data['user_roles'] = "admin";
-            $data['allRoles'] = $this->user_details['all_roles'];
+            $data['user_site_roles'] = $this->user_details['all_roles'];
         } else {
             $data['user_roles'] = array();
             foreach ($this->user_details['user_roles'] as $rkey => $rvalue) {
@@ -158,7 +171,8 @@ class iFlyChat
             }
         }
         $data = json_encode($data);
-        $result = $this->extendedHttpRequest($this->settings['HOST'] . ':' . $this->settings['PORT'] . '/api/1.0/token/generate', $data);
+        $result = $this->extendedHttpRequest($this->settings['HOST'] . ':' . $this->settings['PORT'] . '/api/1.1/token/generate', $data);
+//        print($result);
         if ($result->code == 200) {
             $_SESSION['token'] = $result->key;
             return $result;
@@ -214,18 +228,22 @@ class iFlyChat
         return $result->data;
     }
 
-    public function deleteToken($token = '')
+    public function deleteToken()
     {
         $data = array(
             'api_key' => $this->settings['api_key'],
         );
         $data = json_encode($data);
-        $result = $this->extendedHttpRequest($this->settings['HOST'] . ':' . $this->settings['PORT'] . '/api/1.1/token/'
-            . $token . '/delete', $data);
-        if ($result->code == 200) {
-            unset($_SESSION['token']);
+        if (isset($_SESSION['token']) && !empty($_SESSION['token'])) {
+            $result = $this->extendedHttpRequest($this->settings['HOST'] . ':' . $this->settings['PORT'] . '/api/1.1/token/'
+                . $_SESSION['token'] . '/delete', $data);
+            if ($result->code == 200) {
+                unset($_SESSION['token']);
+            } else {
+                print_r('error in deleting token');
+            }
         } else {
-            print_r('error in deleting token');
+            print_r('Token not set');
         }
     }
 

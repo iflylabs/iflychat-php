@@ -5,8 +5,11 @@
  *
 **/
 require_once('./iflychat.php');
-const API_KEY = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
-const APP_ID =  'XXXXXX-XXXX-XXXXX-XXXXXX';
+const API_KEY = 'XXXXXXXXXXXXXXXXXXXXXXXXX';
+const APP_ID =  'XXXXXXX-XXXX-XXXX-XXX-XXXXXXXXXXXXX';
+$settings = array(
+  'SHOW_POP_UP_CHAT' => true
+);
 
 /**
  *
@@ -18,16 +21,16 @@ $user = array(
   'user_name' => 'test',
   'user_id' => '2'
 );
-$iflychat = new iFlyChat(API_KEY, APP_ID);
+$iflychat = new iFlyChat(API_KEY, APP_ID, $settings);
 //$iflychat->setUser($user);
-//$iflychat->setAvatarUrl('https://pixabay.com/static/uploads/photo/2014/12/22/00/07/tree-576847_960_720.png');
+$//iflychat->setAvatarUrl('https://pixabay.com/static/uploads/photo/2014/12/22/00/07/tree-576847_960_720.png');
 $ifly_html_code = $iflychat->getHtmlCode();
+//$iflychat->deleteToken();
 
 
 ?>
 <html>
 <head>
-<script src = "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 </head>
 <body>
 <h1>How to include iFlyChat code in a sample PHP page?</h1>
