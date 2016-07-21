@@ -68,21 +68,19 @@ class iFlyChat
     public function getHtmlCode()
     {
         $r = '';
-
         if ($this->settings['popup'] === true) {
             $r .= '<script>var iFlyChatDiv = document.createElement("div");';
-            $r .= 'iFlyChatDiv.id = \'iflychat-popup\';';
-            $r .= 'iFlyChatDiv.style.zIndex = \'2147483647\';';
-            $r .= 'iFlyChatDiv.style.position = \'relative\';';
+            $r .= 'iFlyChatDiv.className = \'iflychat-popup\';';
             $r .= 'document.body.appendChild(iFlyChatDiv);';
             $r .= '</script>';
-
         }
-
         $token = $this->getToken();
         if ($token) $r .= '<script> var iflychat_auth_token = "' . $token . '";</script>';
-        $r .= '<script type="text/javascript" src="//10.64.137.161:9000/js/bundle.js?cid='
-            . $this->settings['app_id'] . '"</script>';
+        $r .= '<script>var iFlyChatDiv2 = document.createElement("script");';
+        $r .= 'iFlyChatDiv2.src = "//10.64.137.161:9000/js/bundle.js?app_id='. $this->settings['app_id'].'";';
+        $r .= 'iFlyChatDiv2.async = true;';
+        $r .= 'document.body.appendChild(iFlyChatDiv2);';
+        $r .= '</script>';
         return $r;
     }
 
