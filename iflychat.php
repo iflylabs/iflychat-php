@@ -35,10 +35,10 @@ class iFlyChat
         $this->settings = array(
             'base' => '',
             'version' => 'PHP-1.1.1',
-            'HOST' => 'http://api.iflychatdev.com',
-            'A_HOST' => 'https://api.iflychatdev.com',
-            'PORT' => 40080,
-            'A_PORT' => 40443,
+            'HOST' => 'http://api.iflychat.com',
+            'A_HOST' => 'https://api.iflychat.com',
+            'PORT' => 80,
+            'A_PORT' => 443,
         );
         $this->settings['api_key'] = $api_key;
         $this->settings['app_id'] = $app_id;
