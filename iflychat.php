@@ -10,14 +10,15 @@ class iFlyChat
      */
     function __construct($api_key = '', $app_id = '', $settings = array())
     {
-
-        if (version_compare(phpversion(), '5.4.0', '>=')) {
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-        } else {
-            if (session_id() === '') {
-                session_start();
+        if (!headers_sent()) {
+            if (version_compare(phpversion(), '5.4.0', '>=')) {
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+            } else {
+                if (session_id() === '') {
+                    session_start();
+                }
             }
         }
         $this->user_details = array(
