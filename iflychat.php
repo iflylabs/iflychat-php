@@ -10,14 +10,15 @@ class iFlyChat
      */
     function __construct($api_key = '', $app_id = '', $settings = array())
     {
-
-        if (version_compare(phpversion(), '5.4.0', '>=')) {
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-        } else {
-            if (session_id() === '') {
-                session_start();
+        if (!headers_sent()) {
+            if (version_compare(phpversion(), '5.4.0', '>=')) {
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+            } else {
+                if (session_id() === '') {
+                    session_start();
+                }
             }
         }
         $this->user_details = array(
@@ -42,7 +43,7 @@ class iFlyChat
         );
         $this->settings['api_key'] = $api_key;
         $this->settings['app_id'] = $app_id;
-        $this->settings['popup'] = $settings['SHOW_POP_UP_CHAT'];
+        $this->settings['popup'] = ($settings['SHOW_POP_UP_CHAT'])?$settings['SHOW_POP_UP_CHAT'] : true;
     }
 
 
