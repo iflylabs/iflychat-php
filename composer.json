@@ -1,4 +1,6 @@
 {
     "name": "iflylabs/iflychat-php",
-    "description": "A real time enterprise chat solution which can be integrated with any PHP website",
+    "description": "A real time enterprise chat solution which can be integrated into any PHP website",
+    "keywords": ["chat", "chat room", "community", "embed chat", "friends", "group chat", "html5 chat", "live chat", "mobile chat", "one to one chat", "popup chat"],
+    "homepage": "https://iflychat.com/installation/php-chat-client"
 }
