@@ -1,6 +1,6 @@
 <?php
 
-namespace Iflychat;
+namespace Iflylabs;
 
 class iFlyChat
 {
