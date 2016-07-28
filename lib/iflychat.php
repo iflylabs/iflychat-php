@@ -8,16 +8,17 @@ class iFlyChat
     /*
      * Initialise iFlyChat class with settings and user details array
      */
-    function __construct($api_key = '', $app_id = '', $settings = array())
+    function __construct($app_id = '', $api_key = '', $settings = array())
     {
-
-        if (version_compare(phpversion(), '5.4.0', '>=')) {
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
-        } else {
-            if (session_id() === '') {
-                session_start();
+        if (!headers_sent()) {
+            if (version_compare(phpversion(), '5.4.0', '>=')) {
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+            } else {
+                if (session_id() === '') {
+                    session_start();
+                }
             }
         }
         $this->user_details = array(
@@ -29,12 +30,12 @@ class iFlyChat
             'user_profile_url' => FALSE,
             'user_roles' => array(),
             'user_groups' => array(),
-            'user_roster_list' => array(),
+            'user_relationships' => array(),
             'all_roles' => array()
         );
         $this->settings = array(
             'base' => '',
-            'version' => 'PHP-1.1.1',
+            'version' => 'PHP-2.0.0',
             'HOST' => 'http://api.iflychat.com',
             'A_HOST' => 'https://api.iflychat.com',
             'PORT' => 80,
@@ -42,7 +43,7 @@ class iFlyChat
         );
         $this->settings['api_key'] = $api_key;
         $this->settings['app_id'] = $app_id;
-        $this->settings['popup'] = $settings['SHOW_POP_UP_CHAT'];
+        $this->settings['popup'] = (isset($settings['SHOW_POP_UP_CHAT']))?$settings['SHOW_POP_UP_CHAT'] : true;
     }
 
 
@@ -77,7 +78,7 @@ class iFlyChat
         $token = $this->getToken();
         if ($token) $r .= '<script> var iflychat_auth_token = "' . $token . '";</script>';
         $r .= '<script>var iFlyChatDiv2 = document.createElement("script");';
-        $r .= 'iFlyChatDiv2.src = "//10.64.137.161:9000/js/bundle.js?app_id='. $this->settings['app_id'].'";';
+        $r .= 'iFlyChatDiv2.src = "//cdn.iflychat.com/js/iflychat-v2.min.js?app_id='. $this->settings['app_id'].'";';
         $r .= 'iFlyChatDiv2.async = true;';
         $r .= 'document.body.appendChild(iFlyChatDiv2);';
         $r .= '</script>';
@@ -99,7 +100,7 @@ class iFlyChat
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data_json);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
         $res_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -134,7 +135,6 @@ class iFlyChat
             'user_name' => $user['user_name'],
             'user_id' => $user['user_id'],
             'api_key' => $this->settings['api_key'],
-            'user_roles' => ($this->user_details['is_admin']) ? "admin" : "normal",
             'app_id' => $this->settings['app_id'],
             'version' => $this->settings['version']
         );
@@ -154,23 +154,23 @@ class iFlyChat
 
         if (isset($user['relationships_set'])) {
             if (isset($this->user_details['relationships_set'])) {
-                $data['rel'] = '1';
-                $data['user_roster_list'] = $user['relationships_set'];
+                $data['user_list_filter'] = 'friend';
+                $data['user_relationships'] = $user['relationships_set'];
             }
         } else {
-            $data['rel'] = '0';
+            $data['user_list_filter'] = 'all';
         }
 
         if (isset($user['user_groups'])) {
-            $data['rel'] = '0';
+            $data['user_list_filter'] = 'group';
             $data['user_groups'] = array();
             foreach ($user['user_groups'] as $rkey => $rvalue) {
                 $data['user_groups'][$rkey] = $rvalue;
             }
         }
         $data = json_encode($data);
-        $result = $this->extendedHttpRequest($this->settings['HOST'] . ':' . $this->settings['PORT'] . '/api/1.1/token/generate', $data);
-//        print($result);
+        $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] . '/api/1.1/token/generate', $data);
+        print_r($result);
         if ($result->code == 200) {
             $_SESSION['token'] = $result->key;
             return $result;
@@ -233,7 +233,7 @@ class iFlyChat
         );
         $data = json_encode($data);
         if (isset($_SESSION['token']) && !empty($_SESSION['token'])) {
-            $result = $this->extendedHttpRequest($this->settings['HOST'] . ':' . $this->settings['PORT'] . '/api/1.1/token/'
+            $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] . '/api/1.1/token/'
                 . $_SESSION['token'] . '/delete', $data);
             if ($result->code == 200) {
                 unset($_SESSION['token']);
@@ -264,8 +264,8 @@ class iFlyChat
         if (isset($user['user_groups'])) {
             $this->user_details['user_groups'] = $user['user_groups'];
         }
-        if (isset($user['user_roster_list'])) {
-            $this->user_details['user_roster_list'] = $user['user_roster_list'];
+        if (isset($user['user_relationships'])) {
+            $this->user_details['user_relationships'] = $user['user_relationships'];
         }
     }
 
@@ -297,6 +297,11 @@ class iFlyChat
     public function setUserGroups($user_groups = array())
     {
         $this->user_details['user_groups'] = $user_groups;
+    }
+
+    public function setUserRelationships($user_relationships = array())
+    {
+        $this->user_details['user_relationships'] = $user_relationships;
     }
 
     public function setAllRoles($all_roles = array())
