@@ -5,6 +5,7 @@
  *
 **/
 
+
 require_once('../lib/iflychat.php');
 
 /**
@@ -14,7 +15,8 @@ require_once('../lib/iflychat.php');
 const APP_ID = 'YOUR_APP_ID';
 const API_KEY =  'YOUR_API_KEY';
 
-$iflychat = new iFlyChat(APP_ID, API_KEY);
+
+$iflychat = new \Iflylabs\iFlyChat(APP_ID, API_KEY);
 
 /**
   * You may get user_id, user_name and other user details
