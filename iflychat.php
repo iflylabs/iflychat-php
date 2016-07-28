@@ -43,7 +43,7 @@ class iFlyChat
         );
         $this->settings['api_key'] = $api_key;
         $this->settings['app_id'] = $app_id;
-        $this->settings['popup'] = ($settings['SHOW_POP_UP_CHAT'])?$settings['SHOW_POP_UP_CHAT'] : true;
+        $this->settings['popup'] = (isset($settings['SHOW_POP_UP_CHAT']))?$settings['SHOW_POP_UP_CHAT'] : true;
     }
 
 
