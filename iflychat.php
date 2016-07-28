@@ -8,7 +8,7 @@ class iFlyChat
     /*
      * Initialise iFlyChat class with settings and user details array
      */
-    function __construct($api_key = '', $app_id = '', $settings = array())
+    function __construct($app_id = '', $api_key = '', $settings = array())
     {
         if (!headers_sent()) {
             if (version_compare(phpversion(), '5.4.0', '>=')) {
@@ -135,7 +135,6 @@ class iFlyChat
             'user_name' => $user['user_name'],
             'user_id' => $user['user_id'],
             'api_key' => $this->settings['api_key'],
-            'user_roles' => ($this->user_details['is_admin']) ? "admin" : "normal",
             'app_id' => $this->settings['app_id'],
             'version' => $this->settings['version']
         );
