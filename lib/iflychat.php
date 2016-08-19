@@ -37,7 +37,7 @@ class iFlyChat
         );
         $this->settings = array(
             'base' => '',
-            'version' => 'PHP-2.0.0',
+            'version' => 'PHP-2.0.2',
             'HOST' => 'http://api.iflychat.com',
             'A_HOST' => 'https://api.iflychat.com',
             'PORT' => 80,
@@ -140,7 +140,7 @@ class iFlyChat
             'app_id' => $this->settings['app_id'],
             'version' => $this->settings['version']
         );
-        if (isset($this->user_details['is_admin'])) {
+        if (isset($this->user_details['is_admin'])  && $this->user_details['is_admin'] === TRUE) {
             $data['user_roles'] = "admin";
             $data['user_site_roles'] = $this->user_details['all_roles'];
         } else {
@@ -251,7 +251,7 @@ class iFlyChat
     {
         $this->user_details['user_name'] = $user['user_name'];
         $this->user_details['user_id'] = $user['user_id'];
-        if (isset($user['is_admin'])) {
+        if (isset($user['is_admin'])  && $user['is_admin'] === TRUE ) {
             $this->user_details['is_admin'] = $user['is_admin'];
         }
         if (isset($user['user_avatar_url'])) {
