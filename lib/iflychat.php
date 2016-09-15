@@ -45,7 +45,7 @@ class iFlyChat
         );
         $this->settings['api_key'] = $api_key;
         $this->settings['app_id'] = $app_id;
-        $this->settings['popup'] = (isset($settings['SHOW_POP_UP_CHAT']))?$settings['SHOW_POP_UP_CHAT'] : true;
+        $this->settings['popup'] = (!empty($settings['SHOW_POP_UP_CHAT']))?$settings['SHOW_POP_UP_CHAT'] : true;
     }
 
 
@@ -118,7 +118,7 @@ class iFlyChat
      */
     public function getToken()
     {
-        if (isset($_SESSION['token']) && !empty($_SESSION['token'])) {
+        if (!empty($_SESSION['token']) && !empty($_SESSION['token'])) {
             return $_SESSION['token'];
         } else if ($this->user_details['user_name'] && $this->user_details['user_id']) {
             $json = $this->generateToken($this->user_details);
@@ -140,7 +140,7 @@ class iFlyChat
             'app_id' => $this->settings['app_id'],
             'version' => $this->settings['version']
         );
-        if (isset($this->user_details['is_admin'])  && $this->user_details['is_admin'] === TRUE) {
+        if (!empty($this->user_details['is_admin'])  && $this->user_details['is_admin'] === TRUE) {
             $data['user_roles'] = "admin";
             $data['user_site_roles'] = $this->user_details['all_roles'];
         } else {
@@ -149,13 +149,13 @@ class iFlyChat
                 $data['user_roles'][$rkey] = $rvalue;
             }
         }
-        if (isset($user['user_avatar_url'])) {
+        if (!empty($user['user_avatar_url'])) {
             $data['user_avatar_url'] = $user['user_avatar_url'];
         }
         $data['user_profile_url'] = $user['user_profile_url'];
 
-        if (isset($user['relationships_set'])) {
-            if (isset($this->user_details['relationships_set'])) {
+        if (!empty($user['relationships_set'])) {
+            if (!empty($this->user_details['relationships_set'])) {
                 $data['user_list_filter'] = 'friend';
                 $data['user_relationships'] = $user['relationships_set'];
             }
@@ -163,7 +163,7 @@ class iFlyChat
             $data['user_list_filter'] = 'all';
         }
 
-        if (isset($user['user_groups'])) {
+        if (!empty($user['user_groups'])) {
             $data['user_list_filter'] = 'group';
             $data['user_groups'] = array();
             foreach ($user['user_groups'] as $rkey => $rvalue) {
@@ -185,7 +185,7 @@ class iFlyChat
      */
     private function checkSSL()
     {
-        return (isset($_SERVER) && isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != "off"));
+        return (!empty($_SERVER) && !empty($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] != "off"));
     }
 
     public function getMessageThread($id1 = "1", $id2 = "2")
@@ -233,7 +233,7 @@ class iFlyChat
             'api_key' => $this->settings['api_key'],
         );
         $data = json_encode($data);
-        if (isset($_SESSION['token']) && !empty($_SESSION['token'])) {
+        if (!empty($_SESSION['token']) && !empty($_SESSION['token'])) {
             $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] . '/api/1.1/token/'
                 . $_SESSION['token'] . '/delete', $data);
             if ($result->code == 200) {
@@ -250,22 +250,22 @@ class iFlyChat
     {
         $this->user_details['user_name'] = $user['user_name'];
         $this->user_details['user_id'] = $user['user_id'];
-        if (isset($user['is_admin'])  && $user['is_admin'] === TRUE ) {
+        if (!empty($user['is_admin'])  && $user['is_admin'] === TRUE ) {
             $this->user_details['is_admin'] = $user['is_admin'];
         }
-        if (isset($user['user_avatar_url'])) {
+        if (!empty($user['user_avatar_url'])) {
             $this->user_details['user_avatar_url'] = $user['user_avatar_url'];
         }
-        if (isset($user['user_profile_url'])) {
+        if (!empty($user['user_profile_url'])) {
             $this->user_details['user_profile_url'] = $user['user_profile_url'];
         }
-        if (isset($user['user_roles'])) {
+        if (!empty($user['user_roles'])) {
             $this->user_details['user_roles'] = $user['user_roles'];
         }
-        if (isset($user['user_groups'])) {
+        if (!empty($user['user_groups'])) {
             $this->user_details['user_groups'] = $user['user_groups'];
         }
-        if (isset($user['user_relationships'])) {
+        if (!empty($user['user_relationships'])) {
             $this->user_details['user_relationships'] = $user['user_relationships'];
         }
     }
