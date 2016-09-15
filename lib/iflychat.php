@@ -172,7 +172,6 @@ class iFlyChat
         }
         $data = json_encode($data);
         $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] . '/api/1.1/token/generate', $data);
-        print_r($result);
         if ($result->code == 200) {
             $_SESSION['token'] = $result->key;
             return $result;
