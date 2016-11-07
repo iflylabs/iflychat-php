@@ -31,6 +31,7 @@ $iflychat->setUser(
     'is_admin' => FALSE, // boolean (optional)
     'user_avatar_url' => 'user-avatar-link', // string (optional)
     'user_profile_url' => 'user-profile-link', // string (optional)
+    'is_mod' => FALSE  // boolean (optional)
   )
 );
 

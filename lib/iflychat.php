@@ -33,7 +33,8 @@ class iFlyChat
             'user_roles' => array(),
             'user_groups' => array(),
             'user_relationships' => array(),
-            'all_roles' => array()
+            'all_roles' => array(),
+            'is_mod' => FALSE
         );
         $this->settings = array(
             'base' => '',
@@ -45,7 +46,8 @@ class iFlyChat
         );
         $this->settings['api_key'] = $api_key;
         $this->settings['app_id'] = $app_id;
-        $this->settings['popup'] = (!empty($settings['SHOW_POP_UP_CHAT']))?$settings['SHOW_POP_UP_CHAT'] : true;
+        $this->settings['popup'] = (!empty($settings['SHOW_POP_UP_CHAT']))?$settings['SHOW_POP_UP_CHAT'] : TRUE;
+        $this->settings['session_caching'] = (!empty($settings['USE_SESSION_CACHING']))?$settings['USE_SESSION_CACHING'] : FALSE;
     }
 
 
@@ -118,9 +120,10 @@ class iFlyChat
      */
     public function getToken()
     {
-        if (!empty($_SESSION['token']) && !empty($_SESSION['token'])) {
+        if (!empty($_SESSION['token']) && !empty($_SESSION['token']) && $this->settings['session_caching']) {
             return $_SESSION['token'];
-        } else if ($this->user_details['user_name'] && $this->user_details['user_id']) {
+        } else
+          if ($this->user_details['user_name'] && $this->user_details['user_id']) {
             $json = $this->generateToken($this->user_details);
             return $json->key;
         } else {
@@ -133,6 +136,7 @@ class iFlyChat
      */
     public function generateToken($user = array())
     {
+        $chat_role = "participant";
         $data = array(
             'user_name' => $user['user_name'],
             'user_id' => $user['user_id'],
@@ -140,9 +144,14 @@ class iFlyChat
             'app_id' => $this->settings['app_id'],
             'version' => $this->settings['version']
         );
+        //add chat_role
+        if(!empty($this->user_details['is_mod'])  && $this->user_details['is_mod'] === TRUE){
+          $chat_role = "moderator";
+        }
         if (!empty($this->user_details['is_admin'])  && $this->user_details['is_admin'] === TRUE) {
             $data['user_roles'] = "admin";
             $data['user_site_roles'] = $this->user_details['all_roles'];
+            $chat_role = 'admin';
         } else {
             $data['user_roles'] = array();
             foreach ($this->user_details['user_roles'] as $rkey => $rvalue) {
@@ -170,10 +179,15 @@ class iFlyChat
                 $data['user_groups'][$rkey] = $rvalue;
             }
         }
+
+      $data['chat_role'] = $chat_role;
+
         $data = json_encode($data);
         $result = $this->extendedHttpRequest($this->settings['A_HOST'] . ':' . $this->settings['A_PORT'] . '/api/1.1/token/generate', $data);
         if ($result->code == 200) {
+          if($this->settings['session_caching']){
             $_SESSION['token'] = $result->key;
+          }
             return $result;
         } else {
             return array();
@@ -268,11 +282,18 @@ class iFlyChat
         if (!empty($user['user_relationships'])) {
             $this->user_details['user_relationships'] = $user['user_relationships'];
         }
+        if (!empty($user['is_mod'])  && $user['is_mod'] === TRUE) {
+            $this->user_details['is_mod'] = $user['is_mod'];
+        }
     }
 
     public function setIsAdmin($is_admin = FALSE)
     {
         $this->user_details['is_admin'] = $is_admin;
+    }
+    public function setIsMod($is_mod = FALSE)
+    {
+      $this->user_details['is_mod'] = $is_mod;
     }
 
     public function setAvatarUrl($avatar_url = '')
