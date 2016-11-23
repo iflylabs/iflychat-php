@@ -167,7 +167,11 @@ class iFlyChat
         if (!empty($this->user_details['relationships_set'])) {
             if (!empty($this->user_details['relationships_set'])) {
                 $data['user_list_filter'] = 'friend';
-                $data['user_relationships'] = $this->user_details['relationships_set'];
+              $final_list = array();
+              $final_list['1']['name'] = 'friend';
+              $final_list['1']['plural'] = 'friends';
+              $final_list['1']['valid_uids'] = $this->user_details['user_relationships'];
+              $data['user_relationships'] = $final_list;
             }
         } else {
             $data['user_list_filter'] = 'all';
@@ -279,6 +283,9 @@ class iFlyChat
         }
         if (!empty($user['user_groups'])) {
             $this->user_details['user_groups'] = $user['user_groups'];
+        }
+        if (!empty($user['relationships_set'])) {
+            $this->user_details['relationships_set'] = $user['relationships_set'];
         }
         if (!empty($user['user_relationships'])) {
             $this->user_details['user_relationships'] = $user['user_relationships'];
