@@ -79,7 +79,7 @@ class iFlyChat
             $r .= 'document.body.appendChild(iFlyChatDiv);';
             $r .= '</script>';
         }
-        $token = $this->getToken();
+        $token = $this->getToken()->key;
         if ($token) $r .= '<script> var iflychat_auth_token = "' . $token . '";</script>';
         $r .= '<script>var iFlyChatDiv2 = document.createElement("script");';
         $r .= 'iFlyChatDiv2.src = "//cdn.iflychat.com/js/iflychat-v2.min.js?app_id='. $this->settings['app_id'].'";';
@@ -116,25 +116,9 @@ class iFlyChat
     }
 
     /*
-     * Method for get token
-     */
-    public function getToken()
-    {
-        if (!empty($_SESSION['token']) && !empty($_SESSION['token']) && $this->settings['session_caching']) {
-            return $_SESSION['token'];
-        } else
-          if ($this->user_details['user_name'] && $this->user_details['user_id']) {
-            $json = $this->generateToken();
-            return $json->key;
-        } else {
-            return false;
-        }
-    }
-
-    /*
      * Get auth (key) from iFlyChat
      */
-    public function generateToken()
+    public function getToken()
     {
         $chat_role = "participant";
         $data = array(
