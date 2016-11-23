@@ -12,7 +12,7 @@ class iFlyChat
      */
     function __construct($app_id = '', $api_key = '', $settings = array())
     {
-        if (!headers_sent()) {
+        if (!headers_sent() && !empty($settings['USE_SESSION_CACHING'])) {
             if (version_compare(phpversion(), '5.4.0', '>=')) {
                 if (session_status() === PHP_SESSION_NONE) {
                     session_start();
@@ -124,7 +124,7 @@ class iFlyChat
             return $_SESSION['token'];
         } else
           if ($this->user_details['user_name'] && $this->user_details['user_id']) {
-            $json = $this->generateToken($this->user_details);
+            $json = $this->generateToken();
             return $json->key;
         } else {
             return false;
@@ -134,12 +134,12 @@ class iFlyChat
     /*
      * Get auth (key) from iFlyChat
      */
-    public function generateToken($user = array())
+    public function generateToken()
     {
         $chat_role = "participant";
         $data = array(
-            'user_name' => $user['user_name'],
-            'user_id' => $user['user_id'],
+            'user_name' => $this->user_details['user_name'],
+            'user_id' => $this->user_details['user_id'],
             'api_key' => $this->settings['api_key'],
             'app_id' => $this->settings['app_id'],
             'version' => $this->settings['version']
@@ -158,24 +158,25 @@ class iFlyChat
                 $data['user_roles'][$rkey] = $rvalue;
             }
         }
-        if (!empty($user['user_avatar_url'])) {
-            $data['user_avatar_url'] = $user['user_avatar_url'];
+        if (!empty($this->user_details['user_avatar_url'])) {
+            $data['user_avatar_url'] = $this->user_details['user_avatar_url'];
         }
-        $data['user_profile_url'] = $user['user_profile_url'];
-
-        if (!empty($user['relationships_set'])) {
+      if (!empty($this->user_details['user_profile_url'])) {
+        $data['user_profile_url'] = $this->user_details['user_profile_url'];
+      }
+        if (!empty($this->user_details['relationships_set'])) {
             if (!empty($this->user_details['relationships_set'])) {
                 $data['user_list_filter'] = 'friend';
-                $data['user_relationships'] = $user['relationships_set'];
+                $data['user_relationships'] = $this->user_details['relationships_set'];
             }
         } else {
             $data['user_list_filter'] = 'all';
         }
 
-        if (!empty($user['user_groups'])) {
+        if (!empty($this->user_details['user_groups'])) {
             $data['user_list_filter'] = 'group';
             $data['user_groups'] = array();
-            foreach ($user['user_groups'] as $rkey => $rvalue) {
+            foreach ($this->user_details['user_groups'] as $rkey => $rvalue) {
                 $data['user_groups'][$rkey] = $rvalue;
             }
         }
