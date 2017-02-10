@@ -1,12 +1,19 @@
 <?php
 /**
- * Include iFlyChat PHP Client
- * Ensure that path to iflychat.php is correct
+ *
+ * Ensure that path to autoload.php is correct
  *
 **/
 
+include(__DIR__ .'/../../../autoload.php'); // include the autoload.php present in your vendor folder.
 
-require_once('../lib/iflychat.php');
+use Iflylabs\iFlyChat;
+
+/**
+ * require iflychat.php if you are not using composer.
+ */
+// require_once('../lib/iflychat.php'); // to be used in case you are not using composer.
+
 
 /**
  * Get your APP ID and API Key from https://iflychat.com
@@ -16,7 +23,7 @@ const APP_ID = 'YOUR_APP_ID';
 const API_KEY =  'YOUR_API_KEY';
 
 
-$iflychat = new \Iflylabs\iFlyChat(APP_ID, API_KEY);
+$iflychat = new iFlyChat(APP_ID, API_KEY);
 
 /**
   * You may get user_id, user_name and other user details
