@@ -4,7 +4,7 @@
  *
 **/
 
-include(__DIR__ .'/../../../autoload.php'); // include the autoload.php present in your vendor folder.
+require __DIR__ . '/vendor/autoload.php'; // include the autoload.php present in your vendor folder.
 
 use Iflylabs\iFlyChat;
 
