@@ -12,7 +12,7 @@ class iFlyChat
      */
     function __construct($app_id = '', $api_key = '', $settings = array())
     {
-        if (!headers_sent() && !empty($settings['USE_SESSION_CACHING']) && ($settings['USE_SESSION_CACHING'] === TRUE)) {
+        if (!headers_sent() && isset($settings['USE_SESSION_CACHING']) && ($settings['USE_SESSION_CACHING'] === TRUE)) {
             if (version_compare(phpversion(), '5.4.0', '>=')) {
                 if (session_status() === PHP_SESSION_NONE) {
                     session_start();
@@ -38,7 +38,7 @@ class iFlyChat
         );
         $this->settings = array(
             'base' => '',
-            'version' => 'PHP-2.1.1',
+            'version' => 'PHP-2.1.2',
             'HOST' => 'http://api.iflychat.com',
             'A_HOST' => 'https://api.iflychat.com',
             'PORT' => 80,
@@ -46,8 +46,8 @@ class iFlyChat
         );
         $this->settings['api_key'] = $api_key;
         $this->settings['app_id'] = $app_id;
-        $this->settings['popup'] = (!empty($settings['SHOW_POP_UP_CHAT']))?$settings['SHOW_POP_UP_CHAT'] : TRUE;
-        $this->settings['session_caching'] = (!empty($settings['USE_SESSION_CACHING']))?$settings['USE_SESSION_CACHING'] : FALSE;
+        $this->settings['popup'] = (isset($settings['SHOW_POPUP_CHAT']))?$settings['SHOW_POPUP_CHAT'] : TRUE;
+        $this->settings['session_caching'] = (isset($settings['USE_SESSION_CACHING']))?$settings['USE_SESSION_CACHING'] : FALSE;
     }
 
 
