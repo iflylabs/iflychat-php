@@ -38,7 +38,7 @@ class iFlyChat
         );
         $this->settings = array(
             'base' => '',
-            'version' => 'PHP-2.0.3',
+            'version' => 'PHP-2.1.1',
             'HOST' => 'http://api.iflychat.com',
             'A_HOST' => 'https://api.iflychat.com',
             'PORT' => 80,
