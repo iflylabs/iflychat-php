@@ -38,7 +38,7 @@ class iFlyChat
         );
         $this->settings = array(
             'base' => '',
-            'version' => 'PHP-2.1.3',
+            'version' => 'PHP-2.1.5',
             'HOST' => 'http://api.iflychat.com',
             'A_HOST' => 'https://api.iflychat.com',
             'PORT' => 80,
@@ -48,6 +48,7 @@ class iFlyChat
         $this->settings['app_id'] = $app_id;
         $this->settings['popup'] = (isset($settings['SHOW_POPUP_CHAT']))?$settings['SHOW_POPUP_CHAT'] : TRUE;
         $this->settings['session_caching'] = (isset($settings['USE_SESSION_CACHING']))?$settings['USE_SESSION_CACHING'] : FALSE;
+        $this->settings['auth_url'] = (isset($settings['AUTH_URL']))?$settings['AUTH_URL'] : '';
     }
 
 
@@ -79,8 +80,40 @@ class iFlyChat
             $r .= 'document.body.appendChild(iFlyChatDiv);';
             $r .= '</script>';
         }
-        $token = $this->getTokenWrapper();
-        if ($token) $r .= '<script> var iflychat_auth_token = "' . $token . '";</script>';
+
+        $auth_url = $this->getAuthUrl();
+
+        if($auth_url) {
+          $r .= '<script> var iflychat_auth_url = "' . $auth_url . '";</script>';
+        }
+        else {
+          $token = $this->getToken();
+          if ($token) {
+            $r .= '<script> var iflychat_auth_token = "' . $token . '";</script>';
+          }
+        }
+        
+        $r .= '<script>var iFlyChatDiv2 = document.createElement("script");';
+        $r .= 'iFlyChatDiv2.src = "//cdn.iflychat.com/js/iflychat-v2.min.js?app_id='. $this->settings['app_id'].'";';
+        $r .= 'iFlyChatDiv2.async = true;';
+        $r .= 'document.body.appendChild(iFlyChatDiv2);';
+        $r .= '</script>';
+        return $r;
+    }
+
+    /*
+     * Getter for iFlyChat html code without token
+     */
+    public function getHtmlCodeWithoutToken()
+    {
+        $r = '';
+        if ($this->settings['popup'] === true) {
+            $r .= '<script>var iFlyChatDiv = document.createElement("div");';
+            $r .= 'iFlyChatDiv.className = \'iflychat-popup\';';
+            $r .= 'document.body.appendChild(iFlyChatDiv);';
+            $r .= '</script>';
+        }
+
         $r .= '<script>var iFlyChatDiv2 = document.createElement("script");';
         $r .= 'iFlyChatDiv2.src = "//cdn.iflychat.com/js/iflychat-v2.min.js?app_id='. $this->settings['app_id'].'";';
         $r .= 'iFlyChatDiv2.async = true;';
@@ -118,13 +151,13 @@ class iFlyChat
     /*
      * Method for get token
      */
-    private function getTokenWrapper()
+    public function getToken()
     {
         if (!empty($_SESSION['token']) && !empty($_SESSION['token']) && $this->settings['session_caching']) {
             return $_SESSION['token'];
         } else
           if ($this->user_details['user_name'] && $this->user_details['user_id']) {
-            $json = $this->getToken();
+            $json = $this->getTokenFromServer();
             return $json->key;
         } else {
             return false;
@@ -132,9 +165,21 @@ class iFlyChat
     }
 
     /*
+     * Method for getting auth url
+     */
+    public function getAuthUrl() {
+      if(!empty($this->settings['auth_url']) && $this->user_details['user_name'] && $this->user_details['user_id']) {
+        return $this->settings['auth_url'];
+      }
+      else {
+        return false;
+      }
+    }
+
+    /*
      * Get auth (key) from iFlyChat
      */
-    public function getToken()
+    public function getTokenFromServer()
     {
         $chat_role = "participant";
         $data = array(
